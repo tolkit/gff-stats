@@ -1,14 +1,15 @@
 use bio::io::fasta;
 use bio::io::gff;
 use bio_types::strand::Strand;
-use clap::{App, Arg};
+use clap::{value_t, App, Arg};
+use std::fs::{create_dir_all, File};
+use std::io::LineWriter;
 use std::str;
-
 mod utils;
 
 fn main() {
     // command line options
-    let matches = App::new("Fasta windows")
+    let matches = App::new("GFF stats")
         .version(clap::crate_version!())
         .author("Max Brown <mb39@sanger.ac.uk>")
         .about("Extract GFF3 regions and compute statistics on them.")
@@ -28,22 +29,46 @@ fn main() {
                 .required(true)
                 .help("The reference fasta file."),
         )
+        .arg(
+            Arg::with_name("sequences")
+                .short("s")
+                .long("sequences")
+                .required(false)
+                .default_value("true")
+                .help("Save the extracted CDS fasta sequences?"),
+        )
         .get_matches();
     // parse command line options
     let input_gff = matches.value_of("gff").unwrap();
     let input_fasta = matches.value_of("fasta").unwrap();
+    let save_sequences = value_t!(matches.value_of("sequences"), bool).unwrap_or_else(|e| e.exit());
 
-    // make reverse revcomp in fasta?
-
-    let mut gff_reader =
-        gff::Reader::from_file(input_gff, gff::GffType::GFF3).expect("[-]\tPath invalid.");
     let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
+
+    // create directory for output
+    if let Err(e) = create_dir_all("./gff-stats/") {
+        println!("[-]\tCreate directory error: {}", e.to_string());
+    }
+    let extension = "fasta";
+
+    // create file
+    let file_name = format!("./gff-stats/{}{}", "CDS.", extension);
+    let gff_output = File::create(&file_name).unwrap();
+    let mut gff_output = LineWriter::new(gff_output);
 
     println!("[+]\tExtracting fasta files.");
     // iterate over the fasta records
+    // might have to do a manual loop.
     for result in fasta_reader.records() {
         let fasta_record = result.expect("[-]\tError during fasta record parsing.");
+        println!(
+            "[+]\tProcessing {} - {}bp.",
+            fasta_record.id(),
+            fasta_record.seq().len()
+        );
         // now iterate over the gff file, matching on chromosome/scaff/contig ID
+        let mut gff_reader =
+            gff::Reader::from_file(input_gff, gff::GffType::GFF3).expect("[-]\tPath invalid.");
         for gff_record in gff_reader.records() {
             let rec = gff_record
                 .ok()
@@ -74,28 +99,34 @@ fn main() {
                         let gc_four = utils::utils::gc_four(four_deg_codons);
 
                         // we can save the intermediate fastas if we want?
-                        println!(
-                            ">{}.{}-{}:{}\n{:?}",
-                            fasta_record.id(),
-                            start,
-                            end,
-                            gc_four,
-                            revcomp_slice_str
-                        );
+                        if save_sequences {
+                            utils::utils::create_dir_file(
+                                &mut gff_output,
+                                fasta_record.id(),
+                                start,
+                                end,
+                                gc_four,
+                                &revcomp_slice_str,
+                            )
+                        }
                     } else {
                         let four_deg_codons = utils::utils::gc_four_fold_deg_sites(&slice_str);
                         let gc_four = utils::utils::gc_four(four_deg_codons);
                         // we can save the intermediate fastas if we want?
-                        println!(
-                            ">{}.{}-{}:{}\n{:?}",
-                            fasta_record.id(),
-                            start,
-                            end,
-                            gc_four,
-                            slice_str
-                        );
+                        if save_sequences {
+                            utils::utils::create_dir_file(
+                                &mut gff_output,
+                                fasta_record.id(),
+                                start,
+                                end,
+                                gc_four,
+                                slice_str,
+                            )
+                        }
                     }
                 }
+            } else {
+                continue;
             }
         }
     }
