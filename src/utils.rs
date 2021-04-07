@@ -1,20 +1,6 @@
 pub mod utils {
 
-    use std::io::prelude::*;
-    use std::io::LineWriter;
     use std::str;
-
-    pub fn create_dir_file<T: std::io::Write>(
-        file: &mut LineWriter<T>,
-        id: &str,
-        start: usize,
-        end: usize,
-        gc_four: f64,
-        seq: &str,
-    ) {
-        writeln!(file, ">{}.{}-{}:{}\n{}", id, start, end, gc_four, seq)
-            .unwrap_or_else(|_| println!("[-]\tError in writing to file."));
-    }
 
     pub const FOURFOLD_DEG: [&str; 32] = [
         "CTT", "CTA", "CTG", "CTC", "GTT", "GTC", "GTA", "GTG", "TCT", "TCC", "TCA", "TCG", "CCT",
