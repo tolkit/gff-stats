@@ -4,6 +4,7 @@ pub mod seq {
     use bio::io::gff;
     use bio_types::strand::Strand;
     use rayon::prelude::*;
+    use std::cmp::Reverse;
     use std::str;
 
     use crate::utils;
@@ -18,16 +19,17 @@ pub mod seq {
 
         // does the user want to print out spliced CDS?
         let spliced = matches.is_present("spliced");
+        let protein = matches.is_present("protein");
 
         if spliced {
-            run_spliced(input_gff, input_fasta)
+            run_spliced(input_gff, input_fasta, protein)
         } else {
-            run_cds(input_gff, input_fasta)
+            run_cds(input_gff, input_fasta, protein)
         }
     }
 
     // much faster.
-    fn run_cds(input_gff: &str, input_fasta: &str) {
+    fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) {
         let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
 
         eprintln!("[+]\tProcessing the following fasta sequences in parallel:");
@@ -67,6 +69,7 @@ pub mod seq {
                             start,
                             end,
                             rec.frame(),
+                            false,
                         );
 
                         // TODO: check this is necessary? Will require changing
@@ -81,23 +84,47 @@ pub mod seq {
                         if strandedness == Strand::Reverse {
                             let revcomp_slice_str = &utils::utils::reverse_complement(slice_str);
 
-                            println!(
-                                ">{}: {}(-): {}-{}\n{}",
-                                rec.seqname(),
-                                attr.get("ID").unwrap(),
-                                start,
-                                end,
-                                revcomp_slice_str
-                            )
+                            if protein {
+                                let prot = utils::utils::translate(revcomp_slice_str.as_bytes());
+                                println!(
+                                    ">{}: {}(-): {}-{}\n{}",
+                                    rec.seqname(),
+                                    attr.get("Parent").unwrap(),
+                                    start,
+                                    end,
+                                    prot
+                                )
+                            } else {
+                                println!(
+                                    ">{}: {}(-): {}-{}\n{}",
+                                    rec.seqname(),
+                                    attr.get("Parent").unwrap(),
+                                    start,
+                                    end,
+                                    revcomp_slice_str
+                                )
+                            }
                         } else {
-                            println!(
-                                ">{}: {}(+): {}-{}\n{}",
-                                rec.seqname(),
-                                attr.get("ID").unwrap(),
-                                start,
-                                end,
-                                slice_str
-                            )
+                            if protein {
+                                let prot = utils::utils::translate(slice_str.as_bytes());
+                                println!(
+                                    ">{}: {}(+): {}-{}\n{}",
+                                    rec.seqname(),
+                                    attr.get("ID").unwrap(),
+                                    start,
+                                    end,
+                                    prot
+                                )
+                            } else {
+                                println!(
+                                    ">{}: {}(+): {}-{}\n{}",
+                                    rec.seqname(),
+                                    attr.get("ID").unwrap(),
+                                    start,
+                                    end,
+                                    slice_str
+                                )
+                            }
                         }
                     }
                 }
@@ -106,7 +133,7 @@ pub mod seq {
         eprintln!("[+]\tFinished.");
     }
 
-    fn run_spliced(input_gff: &str, input_fasta: &str) {
+    fn run_spliced(input_gff: &str, input_fasta: &str, protein: bool) {
         let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
         #[derive(Debug)]
         struct SplicedCDS {
@@ -165,12 +192,14 @@ pub mod seq {
                             start,
                             end,
                             rec_1.frame(),
+                            true,
                         );
                         let slice_2 = utils::utils::trim_sequence(
                             fasta_record.seq(),
                             start,
                             end,
                             rec_1.frame(),
+                            true,
                         );
 
                         // TODO: check this is necessary? Will require changing
@@ -202,7 +231,6 @@ pub mod seq {
                                     end,
                                 });
 
-                                use std::cmp::Reverse;
                                 spliced.sort_unstable_by_key(|d| Reverse(d.start));
 
                                 let seq: Vec<&str> =
@@ -211,16 +239,33 @@ pub mod seq {
                                     .iter()
                                     .map(|x| format!("{}-{}", x.start, x.end))
                                     .collect::<Vec<_>>();
-                                let res = seq.join("");
-                                let res2 = positions.join(",");
 
-                                println!(
-                                    ">{}: {}(-): {}\n{}",
-                                    rec_1.seqname(),
-                                    attr_1.get("ID").unwrap(),
-                                    res2,
-                                    res
-                                );
+                                let spliced_cds_seq = seq.join("");
+                                let joined_positions = positions.join(",");
+
+                                if protein {
+                                    let mut prot =
+                                        utils::utils::translate(spliced_cds_seq.as_bytes());
+                                    // remove last *
+                                    prot.pop();
+
+                                    println!(
+                                        ">{}: {}(-): {}\n{}",
+                                        rec_1.seqname(),
+                                        attr_1.get("Parent").unwrap(),
+                                        joined_positions,
+                                        prot
+                                    );
+                                } else {
+                                    println!(
+                                        ">{}: {}(-): {}\n{}",
+                                        rec_1.seqname(),
+                                        attr_1.get("Parent").unwrap(),
+                                        joined_positions,
+                                        spliced_cds_seq
+                                    );
+                                }
+
                                 spliced.clear();
                             }
                         } else {
@@ -247,16 +292,33 @@ pub mod seq {
                                     .iter()
                                     .map(|x| format!("{}-{}", x.start, x.end))
                                     .collect::<Vec<_>>();
-                                let res = seq.join("");
-                                let res2 = positions.join(",");
 
-                                println!(
-                                    ">{}: {}(+): {}\n{}",
-                                    rec_1.seqname(),
-                                    attr_1.get("ID").unwrap(),
-                                    res2,
-                                    res
-                                );
+                                let spliced_cds_seq = seq.join("");
+                                let joined_positions = positions.join(",");
+
+                                if protein {
+                                    let mut prot =
+                                        utils::utils::translate(spliced_cds_seq.as_bytes());
+                                    // remove last *
+                                    prot.pop();
+
+                                    println!(
+                                        ">{}: {}(+): {}\n{}",
+                                        rec_1.seqname(),
+                                        attr_1.get("Parent").unwrap(),
+                                        joined_positions,
+                                        prot
+                                    );
+                                } else {
+                                    println!(
+                                        ">{}: {}(+): {}\n{}",
+                                        rec_1.seqname(),
+                                        attr_1.get("Parent").unwrap(),
+                                        joined_positions,
+                                        spliced_cds_seq
+                                    );
+                                }
+
                                 spliced.clear();
                             }
                         }

@@ -6,8 +6,6 @@ use std::process;
 use gff_stats::seq::seq;
 use gff_stats::stat::stat;
 
-// TODO: maybe return translated sequences?
-
 fn main() {
     // command line options
     let matches = App::new("GFF(3) stats")
@@ -48,17 +46,17 @@ fn main() {
                 .long("spliced")
                 .help("Compute stats on spliced CDS sequences?"),
             )
-            .arg(
-                    Arg::with_name("output")
-                        .short("o")
-                        .long("output")
-                        .takes_value(true)
-                        .default_value("gff-stat")
-                        .help("Output filename for the TSV (without extension)."),
-                )
+        .arg(
+            Arg::with_name("output")
+                .short("o")
+                .long("output")
+                .takes_value(true)
+                .default_value("gff-stat")
+                .help("Output filename for the TSV (without extension)."),
+            )
         )
         .subcommand(SubCommand::with_name("seq")
-            .about("Extract CDS regions to fasta format")
+            .about("Extract CDS regions to fasta format. Printed to stdout.")
             .arg(
             Arg::with_name("gff")
             .short("g")
@@ -75,22 +73,28 @@ fn main() {
                 .required(true)
                 .help("The reference fasta file."),
         )
-            .arg(
-                Arg::with_name("spliced")
-                    .short("p")
-                    .long("spliced")
-                    .help("Save the spliced extracted CDS fasta sequences?"),
-                )
-                .arg(
-                    Arg::with_name("output")
-                        .short("o")
-                        .long("output")
-                        .takes_value(true)
-                        .default_value("gff-stat")
-                        .help("Output filename for the fasta (without extension)."),
-                )
-            )
-            .get_matches();
+        .arg(
+            Arg::with_name("spliced")
+                .short("s")
+                .long("spliced")
+                .help("Save the spliced extracted CDS fasta sequences?"),
+        )
+        .arg(
+            Arg::with_name("protein")
+                .short("p")
+                .long("protein")
+                .help("Save the extracted CDS fasta sequences as a translated protein?"),
+        )
+        .arg(
+            Arg::with_name("output")
+                .short("o")
+                .long("output")
+                .takes_value(true)
+                .default_value("gff-stat")
+                .help("Output filename for the fasta (without extension)."),
+        )
+    )
+    .get_matches();
 
     let subcommand = matches.subcommand();
 

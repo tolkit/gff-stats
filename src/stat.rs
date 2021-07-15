@@ -145,6 +145,7 @@ pub mod stat {
                                 start,
                                 end,
                                 rec.frame(),
+                                false,
                             );
 
                             // TODO: check this is necessary? Will require changing
@@ -282,12 +283,14 @@ pub mod stat {
                                 start,
                                 end,
                                 rec_1.frame(),
+                                true,
                             );
                             let slice_2 = utils::utils::trim_sequence(
                                 fasta_record.seq(),
                                 start,
                                 end,
                                 rec_1.frame(),
+                                true,
                             );
 
                             // TODO: check this is necessary? Will require changing

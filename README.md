@@ -1,17 +1,19 @@
 # GFF(3) stats
 
-Given a genome and a corresponding GFF3 file, calculate various statistics on the coding regions.
+Given a genome and a corresponding GFF3 file, calculate various statistics on the coding regions (or extract them).
 
-Current output is a tsv, with bed-like first three columns (i.e. sequence ID, attribute ID, start, end...).
+Current output is a tsv, with bed-like first three columns (i.e. sequence ID, attribute Parent ID, start, end...).
 
 GC percent, GC skew, AT percent, and AC skew are calculated for each:
-- raw CDS (or spliced CDS)
-- four(six)-fold degenerate sites from the CDS
-- third codon position for each codon in the CDS
+- raw CDS (or spliced CDS) (GC)
+- four(six)-fold degenerate sites from the CDS (GC4)
+- third codon position for each codon in the CDS (GC3)
 
-gff-stats can also extract CDS/spliced CDS to a fasta file (see below).
+gff-stats can also extract CDS/spliced CDS as a nucleotide or protein string to a fasta file (see below). Note this functionality is also provided by <a href="https://github.com/gpertea/gffread">gffread</a>.
 
-The script takes into account strandedness and frame of the CDS. Performance is okay, but needs more testing on big genomes.
+Performance is okay, but needs more testing on big genomes.
+
+Note that (obviously) the GFF must be in the correct format.
 
 ## Build
 
@@ -29,7 +31,7 @@ cargo build --release
 `gff-stats -h`:
 
 ```bash
-GFF(3) stats 0.2.0
+GFF(3) stats 0.2.1
 Max Brown <mb39@sanger.ac.uk>
 Extract GFF3 regions from a reference fasta and compute statistics on them.
 
@@ -42,7 +44,7 @@ FLAGS:
 
 SUBCOMMANDS:
     help    Prints this message or the help of the given subcommand(s)
-    seq     Extract CDS regions to fasta format
+    seq     Extract CDS regions to fasta format. Printed to stdout.
     stat    Compute statistics on CDS regions
 ```
 
@@ -72,14 +74,15 @@ OPTIONS:
 
 ```bash 
 gff-stats-seq 
-Extract CDS regions to fasta format
+Extract CDS regions to fasta format. Printed to stdout.
 
 USAGE:
     gff-stats seq [FLAGS] [OPTIONS] --fasta <fasta> --gff <gff>
 
 FLAGS:
     -h, --help       Prints help information
-    -p, --spliced    Save the spliced extracted CDS fasta sequences?
+    -p, --protein    Save the extracted CDS fasta sequences as a translated protein?
+    -s, --spliced    Save the spliced extracted CDS fasta sequences?
     -V, --version    Prints version information
 
 OPTIONS:
@@ -87,7 +90,3 @@ OPTIONS:
     -g, --gff <gff>          The input gff file.
     -o, --output <output>    Output filename for the fasta (without extension). [default: gff-stat]
 ```
-
-## TODO's
-
-- Extract amino acid sequences
