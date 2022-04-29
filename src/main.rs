@@ -1,39 +1,39 @@
-// gff-stats by Max Brown <mb39@sanger.ac.uk> //
-
-use clap::{App, Arg, SubCommand};
+use clap::{Arg, Command};
 use std::process;
 
-use gff_stats::seq::seq;
-use gff_stats::stat::stat;
+use gff_stats::seq;
+use gff_stats::stat;
 
 fn main() {
     // command line options
-    let matches = App::new("GFF(3) stats")
+    let matches = Command::new("GFF(3) stats")
         .version(clap::crate_version!())
+        .propagate_version(true)
+        .arg_required_else_help(true)
         .author("Max Brown <mb39@sanger.ac.uk>")
         .about("Extract GFF3 regions from a reference fasta and compute statistics on them.")
         .subcommand(
-            SubCommand::with_name("stat")
+            Command::new("stat")
             .about("Compute statistics on CDS regions")
         .arg(
-            Arg::with_name("gff")
-            .short("g")
+            Arg::new("gff")
+            .short('g')
             .long("gff")
             .takes_value(true)
             .required(true)
             .help("The input gff file."),
         )
         .arg(
-            Arg::with_name("fasta")
-                .short("f")
+            Arg::new("fasta")
+                .short('f')
                 .long("fasta")
                 .takes_value(true)
                 .required(true)
                 .help("The reference fasta file."),
         )
         .arg(
-            Arg::with_name("degeneracy")
-                .short("d")
+            Arg::new("degeneracy")
+                .short('d')
                 .long("degeneracy")
                 .required(false)
                 .default_value("fourfold")
@@ -41,53 +41,53 @@ fn main() {
                 .help("Calculate statistics on four-fold or six-fold (in addition to four-fold) degenerate codon sites."),
             )
         .arg(
-            Arg::with_name("spliced")
-                .short("p")
+            Arg::new("spliced")
+                .short('p')
                 .long("spliced")
                 .help("Compute stats on spliced CDS sequences?"),
             )
         .arg(
-            Arg::with_name("output")
-                .short("o")
+            Arg::new("output")
+                .short('o')
                 .long("output")
                 .takes_value(true)
                 .default_value("gff-stat")
                 .help("Output filename for the TSV (without extension)."),
             )
         )
-        .subcommand(SubCommand::with_name("seq")
+        .subcommand(Command::new("seq")
             .about("Extract CDS regions to fasta format. Printed to stdout.")
             .arg(
-            Arg::with_name("gff")
-            .short("g")
+            Arg::new("gff")
+            .short('g')
             .long("gff")
             .takes_value(true)
             .required(true)
             .help("The input gff file."),
         )
         .arg(
-            Arg::with_name("fasta")
-                .short("f")
+            Arg::new("fasta")
+                .short('f')
                 .long("fasta")
                 .takes_value(true)
                 .required(true)
                 .help("The reference fasta file."),
         )
         .arg(
-            Arg::with_name("spliced")
-                .short("s")
+            Arg::new("spliced")
+                .short('s')
                 .long("spliced")
                 .help("Save the spliced extracted CDS fasta sequences?"),
         )
         .arg(
-            Arg::with_name("protein")
-                .short("p")
+            Arg::new("protein")
+                .short('p')
                 .long("protein")
                 .help("Save the extracted CDS fasta sequences as a translated protein?"),
         )
         .arg(
-            Arg::with_name("output")
-                .short("o")
+            Arg::new("output")
+                .short('o')
                 .long("output")
                 .takes_value(true)
                 .default_value("gff-stat")
@@ -98,13 +98,14 @@ fn main() {
 
     let subcommand = matches.subcommand();
 
-    match subcommand.0 {
-        "stat" => {
-            let matches = subcommand.1.unwrap();
+    match subcommand {
+        Some(("stat", matches)) => {
             stat::calculate_stats(matches);
         }
-        "seq" => {
-            let matches = subcommand.1.unwrap();
+        Some(("seq", matches)) => {
+            seq::generate_seqs(matches);
+        }
+        Some(("rename", matches)) => {
             seq::generate_seqs(matches);
         }
         _ => {

@@ -1,13 +1,13 @@
 [package]
 name = "gff-stats"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Max Brown <mb39@sanger.ac.uk>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bio = "0.33.0"
+bio = "0.41.0"
 bio-types = "0.11.0"
-clap = "~2.27.0"
+clap = {version = "3.1.12", features = ["cargo"]}
 rayon = "1.5.0"
