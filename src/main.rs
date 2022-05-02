@@ -105,9 +105,6 @@ fn main() {
         Some(("seq", matches)) => {
             seq::generate_seqs(matches);
         }
-        Some(("rename", matches)) => {
-            seq::generate_seqs(matches);
-        }
         _ => {
             eprintln!("Subcommand invalid, run with '--help' for subcommand options. Exiting.");
             process::exit(1);
