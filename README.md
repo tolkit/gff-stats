@@ -27,7 +27,7 @@ cargo install --path .
 
 ## Usage
 
-### `gff-stats -h`:
+### `gff-stats -h`
 
 ```bash
 GFF(3) stats 0.2.2
@@ -100,3 +100,11 @@ OPTIONS:
     -s, --spliced            Save the spliced extracted CDS fasta sequences?
     -V, --version            Print version information
 ```
+
+### Docs
+
+<p align="center">
+    <b>
+        <a href="https://tolkit.github.io/gff-stats/">API documentation</a>
+    </b>
+</p>
