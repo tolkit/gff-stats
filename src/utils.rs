@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::str;
 
-// directly from https://github.com/dweb0/protein-translate/blob/master/src/lib.rs
+/// Taken directly from `<https://github.com/dweb0/protein-translate/blob/master/src/lib.rs>`
 pub fn translate(seq: &[u8]) -> String {
     let mut peptide = String::with_capacity(seq.len() / 3);
 
@@ -28,7 +28,7 @@ pub fn translate(seq: &[u8]) -> String {
     peptide
 }
 
-/// https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+/// `<https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi>`
 /// U is equivalent to T here
 ///
 /// The 1st index picks the 4x4 block
@@ -61,7 +61,7 @@ static AA_TABLE_CANONICAL: [[[char; 4]; 4]; 4] = [
     ],
 ];
 
-/// Maps an ASCII character to array index
+/// Maps an ASCII character to array index.
 ///
 /// A = 65, a = 97  => 0
 /// C = 67, c = 99  => 1
@@ -79,22 +79,21 @@ static ASCII_TO_INDEX: [usize; 128] = [
     4, 4, 4, 4, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, // 112-127  (116 = t, 117 = u)
 ];
 
+/// The fourfold degenerate codons.
 pub const FOURFOLD_DEG: [&str; 32] = [
     "CTT", "CTA", "CTG", "CTC", "GTT", "GTC", "GTA", "GTG", "TCT", "TCC", "TCA", "TCG", "CCT",
     "CCC", "CCA", "CCG", "ACT", "ACC", "ACA", "ACG", "GCT", "GCC", "GCA", "GCG", "CGT", "CGC",
     "CGA", "CGG", "GGT", "GGC", "GGA", "GGG",
 ];
 
-// includes Leucine, Serine and Arginine
-
+/// The sixfold degenerate codons. Includes Leucine, Serine and Arginine.
 pub const SIXFOLD_DEG: [&str; 38] = [
     "TTA", "TTG", "CTT", "CTA", "CTG", "CTC", "GTT", "GTC", "GTA", "GTG", "TCT", "TCC", "TCA",
     "TCG", "AGT", "AGC", "CCT", "CCC", "CCA", "CCG", "ACT", "ACC", "ACA", "ACG", "GCT", "GCC",
     "GCA", "GCG", "CGT", "CGC", "CGA", "CGG", "AGA", "AGG", "GGT", "GGC", "GGA", "GGG",
 ];
 
-// stats on the whole sequence
-
+/// Statistics on the whole sequence.
 pub struct Stats {
     pub gc_percent: f64,
     pub at_percent: f64,
@@ -102,8 +101,7 @@ pub struct Stats {
     pub at_skew: f64,
 }
 
-// simply calculate basic statistics on &str dna
-
+/// Simply calculate basic statistics on a [`&str`].
 pub fn whole_seq_stats(dna: &str) -> Stats {
     // chars uses quite a bit more memory here
     // but sequences should never be super long...
@@ -124,8 +122,7 @@ pub fn whole_seq_stats(dna: &str) -> Stats {
     }
 }
 
-// stats on the 4-fold-degenerate-sites
-
+/// Statistics on the 4-fold-degenerate-sites.
 pub struct FourFoldStats {
     pub gc_percent: f64,
     pub at_percent: f64,
@@ -133,8 +130,7 @@ pub struct FourFoldStats {
     pub at_skew: f64,
 }
 
-// take the vector of degenerate codons and calculate stats.
-
+/// Take the vector of degenerate codons and calculate statistics.
 pub fn four_fold_site_stats(codons: Vec<&[u8]>) -> FourFoldStats {
     let codon_vec = codons
         .into_iter()
@@ -170,8 +166,7 @@ pub fn four_fold_site_stats(codons: Vec<&[u8]>) -> FourFoldStats {
     }
 }
 
-// take a trimmed sequence and return a vector of four/sixfold degenerate codons.
-
+/// Take a trimmed sequence and return a vector of four/sixfold degenerate codons.
 pub fn gc_four_fold_deg_sites<'a>(dna: &'a str, degeneracy: &str) -> Vec<&'a [u8]> {
     let bytes = dna.as_bytes();
     let codon_iterator = bytes.chunks(3);
@@ -200,6 +195,7 @@ pub fn gc_four_fold_deg_sites<'a>(dna: &'a str, degeneracy: &str) -> Vec<&'a [u8
     collector
 }
 
+/// GC content at the third codon position.
 pub struct GC3Stats {
     pub gc_percent: f64,
     pub at_percent: f64,
@@ -207,6 +203,7 @@ pub struct GC3Stats {
     pub at_skew: f64,
 }
 
+/// Calculate the GC content of the third position of a codon.
 pub fn gc_3(dna: &str) -> GC3Stats {
     let iter = dna.as_bytes().chunks(3);
 
@@ -244,10 +241,9 @@ pub fn gc_3(dna: &str) -> GC3Stats {
     }
 }
 
-// from the fasta sequence iteration, get the subsequence
-// and trim the sequence depending on the frame.
-// if the sequence is not modulo 3, force it to be so.
-
+/// From the fasta sequence iteration, get the subsequence
+/// and trim the sequence depending on the frame.
+/// If the sequence is not modulo 3, force it to be so.
 pub fn trim_sequence<'a>(
     seq: &'a [u8],
     start: usize,
@@ -285,6 +281,7 @@ pub fn trim_sequence<'a>(
     }
 }
 
+/// Reverse complement a string of DNA.
 pub fn reverse_complement(dna: &str) -> String {
     let dna_chars = dna.chars();
     let mut revcomp = Vec::new();
@@ -296,7 +293,7 @@ pub fn reverse_complement(dna: &str) -> String {
     revcomp.into_iter().collect()
 }
 
-// switch lowercase letters too here.
+/// Switch bases to their complement.
 fn switch_base(c: char) -> char {
     match c {
         'A' => 'T',
