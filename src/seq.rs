@@ -1,3 +1,4 @@
+use anyhow::Result;
 use bio::io::fasta;
 use bio::io::gff;
 use bio_types::strand::Strand;
@@ -10,7 +11,9 @@ use crate::utils;
 // as far as I know, the printing of fastas is not repeatable, or fully ordered
 // as it's run in parallel
 
-pub fn generate_seqs(matches: &clap::ArgMatches) {
+/// Wrapper function to generate the sequences (either nucleotide/protein)
+/// from a fasta file and a GFF3 file.
+pub fn generate_seqs(matches: &clap::ArgMatches) -> Result<()> {
     // parse command line options
     let input_gff = matches.value_of("gff").unwrap();
     let input_fasta = matches.value_of("fasta").unwrap();
@@ -20,15 +23,21 @@ pub fn generate_seqs(matches: &clap::ArgMatches) {
     let protein = matches.is_present("protein");
 
     if spliced {
-        run_spliced(input_gff, input_fasta, protein)
+        run_spliced(input_gff, input_fasta, protein)?
     } else {
-        run_cds(input_gff, input_fasta, protein)
+        run_cds(input_gff, input_fasta, protein)?
     }
+
+    Ok(())
 }
 
-// much faster.
-fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) {
-    let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
+/// Non-spliced version of the function which prints out sequences to
+/// `STDOUT`.
+///
+/// Note the order of output sequences is not repeatable, as they are
+/// processed in parallel.
+fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
+    let fasta_reader = fasta::Reader::from_file(input_fasta)?;
 
     eprintln!("[+]\tProcessing the following fasta sequences in parallel:");
     fasta_reader.records().par_bridge().for_each(|record| {
@@ -123,11 +132,19 @@ fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) {
             }
         }
     });
+
     eprintln!("[+]\tFinished.");
+
+    Ok(())
 }
 
-fn run_spliced(input_gff: &str, input_fasta: &str, protein: bool) {
-    let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
+/// Spliced version of the function which prints out sequences to
+/// `STDOUT`.
+///
+/// Note the order of output sequences is not repeatable, as they are
+/// processed in parallel.
+fn run_spliced(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
+    let fasta_reader = fasta::Reader::from_file(input_fasta)?;
     #[derive(Debug)]
     struct SplicedCDS {
         seq: String,
@@ -306,5 +323,8 @@ fn run_spliced(input_gff: &str, input_fasta: &str, protein: bool) {
             }
         }
     });
+
     eprintln!("[+]\tFinished.");
+
+    Ok(())
 }

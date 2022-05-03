@@ -365,6 +365,7 @@ dependencies = [
 name = "gff-stats"
 version = "0.2.2"
 dependencies = [
+ "anyhow",
  "bio",
  "bio-types",
  "clap",

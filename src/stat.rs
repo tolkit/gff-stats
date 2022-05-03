@@ -1,3 +1,4 @@
+use anyhow::Result;
 use bio::io::fasta;
 use bio::io::gff;
 use bio_types::strand::Strand;
@@ -10,9 +11,9 @@ use std::sync::mpsc::channel;
 
 use crate::utils;
 
-// TODO: investigate indexing fasta files for random access.
-
-pub fn calculate_stats(matches: &clap::ArgMatches) {
+/// Wrapper function to calculate statistics on sequences from a
+/// GFF3 file.
+pub fn calculate_stats(matches: &clap::ArgMatches) -> Result<()> {
     // parse command line options
     let input_gff = matches.value_of("gff").unwrap();
     let input_fasta = matches.value_of("fasta").unwrap();
@@ -26,32 +27,43 @@ pub fn calculate_stats(matches: &clap::ArgMatches) {
     }
 
     let file_name = format!("./gff-stats/{}_stats.tsv", output);
-    let stats = File::create(&file_name).expect("[-]\tUnable to create file");
+    let stats = File::create(&file_name)?;
     let stats = LineWriter::new(stats);
     let mut f = BufWriter::new(stats);
 
     if spliced {
-        calculate_stats_spliced(input_gff, input_fasta, degeneracy, &mut f)
+        calculate_stats_spliced(input_gff, input_fasta, degeneracy, &mut f)?
     } else {
-        calculate_stats_unspliced(input_gff, input_fasta, degeneracy, &mut f)
+        calculate_stats_unspliced(input_gff, input_fasta, degeneracy, &mut f)?
     }
+
+    Ok(())
 }
 
-// struct sent through the parallel channels
+/// Data structure sent through the parallel iterator.
 pub struct Output {
+    /// ID of the fasta
     pub fasta_id: String,
+    /// ID of the GFF3 attribute
     pub attr_id: String,
+    /// Index start of the sequence
     pub start: usize,
+    /// Index end of the sequence
     pub end: usize,
+    /// The statistics generated on the sequence
     pub stats: utils::Stats,
+    /// The four-fold-degenerate statistics calculated on the sequences
     pub gc_four_stats: utils::FourFoldStats,
+    /// The GC content of the third codon position
     pub gc_3_stats: utils::GC3Stats,
 }
 
+/// Wrapper for a vector of type [`Output`].
 pub struct Writer {
     output: Vec<Output>,
 }
 
+/// The headers of the output table.
 const HEADERS: [&str; 16] = [
     "fasta_id",
     "attr_id",
@@ -72,10 +84,11 @@ const HEADERS: [&str; 16] = [
 ];
 
 impl Writer {
-    pub fn write<T: Write>(&self, file: &mut BufWriter<LineWriter<T>>) -> std::io::Result<()> {
+    /// Write a vector of type [`Output`].
+    pub fn write<T: Write>(&self, file: &mut BufWriter<LineWriter<T>>) -> Result<()> {
         let headers = HEADERS.join("\t");
         // write the headers
-        writeln!(file, "{}", headers).unwrap_or_else(|_| eprintln!("[-]\tError in writing to file."));
+        writeln!(file, "{}", headers)?;
 
         for i in &self.output {
             writeln!(
@@ -97,8 +110,7 @@ impl Writer {
                 i.gc_3_stats.at_percent,
                 i.gc_3_stats.gc_skew,
                 i.gc_3_stats.at_skew
-            )
-            .unwrap_or_else(|_| eprintln!("[-]\tError in writing to file."));
+            )?;
         }
         eprintln!("[+]\tResults written.");
 
@@ -106,13 +118,18 @@ impl Writer {
     }
 }
 
+/// Non-spliced version of the function which prints out statistics to
+/// `STDOUT`.
+///
+/// Note the order of output statistics is not repeatable, as they are
+/// processed in parallel.
 fn calculate_stats_unspliced<T: Write>(
     input_gff: &str,
     input_fasta: &str,
     degeneracy: String,
     f: &mut BufWriter<LineWriter<T>>,
-) {
-    let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
+) -> Result<()> {
+    let fasta_reader = fasta::Reader::from_file(input_fasta)?;
 
     // parallelise the processing of the fastas.
     let (sender, receiver) = channel();
@@ -218,24 +235,34 @@ fn calculate_stats_unspliced<T: Write>(
 
     eprintln!("[+]\tCollected output and writing.");
 
-    writer.write(f).expect("Writing failed.");
+    writer.write(f)?;
+
+    Ok(())
 }
 
-// store the spliced CDS sequences
+/// Store the spliced CDS sequences
 #[derive(Debug)]
 pub struct SplicedCDS {
+    /// The sequence of the CDS
     pub seq: String,
+    /// Index start of the sequence
     pub start: usize,
+    /// Index end of the sequence
     pub end: usize,
 }
 
+/// Spliced version of the function which prints out statistics to
+/// `STDOUT`.
+///
+/// Note the order of output statistics is not repeatable, as they are
+/// processed in parallel.
 fn calculate_stats_spliced<T: Write>(
     input_gff: &str,
     input_fasta: &str,
     degeneracy: String,
     f: &mut BufWriter<LineWriter<T>>,
-) {
-    let fasta_reader = fasta::Reader::from_file(input_fasta).expect("[-]\tPath invalid.");
+) -> Result<()> {
+    let fasta_reader = fasta::Reader::from_file(input_fasta)?;
 
     // parallelise the processing of the fastas.
     let (sender, receiver) = channel();
@@ -434,5 +461,7 @@ fn calculate_stats_spliced<T: Write>(
 
     eprintln!("[+]\tCollected output and writing.");
 
-    writer.write(f).expect("Writing failed.");
+    writer.write(f)?;
+
+    Ok(())
 }

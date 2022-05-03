@@ -1,5 +1,3 @@
-// TODO: add translation table.
-
 use std::collections::HashMap;
 use std::str;
 

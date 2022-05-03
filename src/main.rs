@@ -1,10 +1,11 @@
+use anyhow::Result;
 use clap::{Arg, Command};
 use std::process;
 
 use gff_stats::seq;
 use gff_stats::stat;
 
-fn main() {
+fn main() -> Result<()> {
     // command line options
     let matches = Command::new("GFF(3) stats")
         .version(clap::crate_version!())
@@ -100,14 +101,16 @@ fn main() {
 
     match subcommand {
         Some(("stat", matches)) => {
-            stat::calculate_stats(matches);
+            stat::calculate_stats(matches)?;
         }
         Some(("seq", matches)) => {
-            seq::generate_seqs(matches);
+            seq::generate_seqs(matches)?;
         }
         _ => {
             eprintln!("Subcommand invalid, run with '--help' for subcommand options. Exiting.");
             process::exit(1);
         }
     }
+
+    Ok(())
 }
