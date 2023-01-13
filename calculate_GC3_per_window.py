@@ -28,16 +28,16 @@ def parse_index(index_file):
             chr_windows_length_dict[chr][window] = 0
     return chr_list, chr_windows_GC3_dict, chr_windows_length_dict
 
-def calculate_GC3_in_windows(table_file, chr_windows_GC3_dict, chr_windows_length_dict):
+def calculate_GC3_in_windows(table_file, chr_windows_GC3_dict, chr_windows_length_dict,window_size):
     with open(table_file, 'r') as table:
         # Read in output of gff-stats (fron spliced mode)
         for line in table:
-                if not line.startswith('fasta'):
+                if not line.startswith('ID'):
                     cols = line.rstrip("\n").split()
                     chr, start, stop, gc3_per = cols[0], cols[2], cols[3], cols[12]
                     int_start = int(int(start)/window_size)
                     int_stop = int(int(stop)/window_size)
-                    length = int(stop) - int(start)
+                    length = abs(int(stop) - int(start)) # get absolute length as 'stop' may be higher or lower than 'start' depending on orientation +/-
                     if int_start == int_stop:
                         window_name = int_start
                         current_GC3_value = chr_windows_GC3_dict[chr][window_name]
@@ -85,5 +85,5 @@ if __name__ == "__main__":
 print("[+] Parsing index file and initialise windows...")
 chr_list, chr_windows_GC3_dict, chr_windows_length_dict = parse_index(index_file)
 print("[+] Calculate GC3 per window")
-chr_windows_GC3_dict, chr_windows_length_dict = calculate_GC3_in_windows(table_file, chr_windows_GC3_dict, chr_windows_length_dict)
+chr_windows_GC3_dict, chr_windows_length_dict = calculate_GC3_in_windows(table_file, chr_windows_GC3_dict, chr_windows_length_dict,window_size)
 write_GC3_per_window_file(prefix, chr_list, chr_windows_GC3_dict, chr_windows_length_dict)
