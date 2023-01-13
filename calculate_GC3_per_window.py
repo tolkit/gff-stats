@@ -37,7 +37,7 @@ def calculate_GC3_in_windows(table_file, chr_windows_GC3_dict, chr_windows_lengt
                     chr, start, stop, gc3_per = cols[0], cols[2], cols[3], cols[12]
                     int_start = int(int(start)/window_size)
                     int_stop = int(int(stop)/window_size)
-                    length = int(stop) - int(start)
+                    length = abs(int(stop) - int(start)) # get absolute length as 'stop' may be higher or lower than 'start' depending on orientation +/-
                     if int_start == int_stop:
                         window_name = int_start
                         current_GC3_value = chr_windows_GC3_dict[chr][window_name]
