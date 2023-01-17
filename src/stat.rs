@@ -191,7 +191,10 @@ fn calculate_stats_unspliced<T: Write>(
                             let revcomp_slice_str = &utils::reverse_complement(slice_str);
 
                             // I presume doing stats on the spliced seq would go here.
-                            let gc_3_stats = utils::gc_3(revcomp_slice_str);
+                            let gc_3_stats = utils::gc_3(
+                                revcomp_slice_str,
+                                Some(attr.get("ID").unwrap().clone()),
+                            );
                             let seq_stats = utils::whole_seq_stats(revcomp_slice_str);
                             let four_deg_codons =
                                 utils::gc_four_fold_deg_sites(revcomp_slice_str, &degeneracy);
@@ -208,7 +211,8 @@ fn calculate_stats_unspliced<T: Write>(
                             })
                             .expect("Did not send.");
                         } else {
-                            let gc_3_stats = utils::gc_3(slice_str);
+                            let gc_3_stats =
+                                utils::gc_3(slice_str, Some(attr.get("ID").unwrap().clone()));
                             let seq_stats = utils::whole_seq_stats(slice_str);
                             let four_deg_codons =
                                 utils::gc_four_fold_deg_sites(slice_str, &degeneracy);
@@ -377,7 +381,8 @@ fn calculate_stats_spliced<T: Write>(
                                 let res = seq.join("");
 
                                 // I presume doing stats on the spliced seq would go here.
-                                let gc_3_stats = utils::gc_3(&res);
+                                let gc_3_stats =
+                                    utils::gc_3(&res, Some(attr_1.get("ID").unwrap().clone()));
                                 let seq_stats = utils::whole_seq_stats(&res);
                                 let four_deg_codons =
                                     utils::gc_four_fold_deg_sites(&res, &degeneracy);
@@ -431,7 +436,8 @@ fn calculate_stats_spliced<T: Write>(
 
                                 let res = seq.join("");
 
-                                let gc_3_stats = utils::gc_3(&res);
+                                let gc_3_stats =
+                                    utils::gc_3(&res, Some(attr_1.get("ID").unwrap().clone()));
                                 let seq_stats = utils::whole_seq_stats(&res);
                                 let four_deg_codons =
                                     utils::gc_four_fold_deg_sites(&res, &degeneracy);

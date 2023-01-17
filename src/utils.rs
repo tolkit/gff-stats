@@ -196,6 +196,7 @@ pub fn gc_four_fold_deg_sites<'a>(dna: &'a str, degeneracy: &str) -> Vec<&'a [u8
 }
 
 /// GC content at the third codon position.
+#[derive(Default)]
 pub struct GC3Stats {
     pub gc_percent: f64,
     pub at_percent: f64,
@@ -204,7 +205,18 @@ pub struct GC3Stats {
 }
 
 /// Calculate the GC content of the third position of a codon.
-pub fn gc_3(dna: &str) -> GC3Stats {
+pub fn gc_3(dna: &str, id: Option<String>) -> GC3Stats {
+    let dna_length = dna.len();
+    let will_work = (dna_length % 3) == 0;
+
+    if !will_work {
+        eprintln!(
+            "[-]\tWarning, GC3 could not be calculated for: {}",
+            id.unwrap_or("".into())
+        );
+        return GC3Stats::default();
+    }
+
     let iter = dna.as_bytes().chunks(3);
 
     let mut third_pos = Vec::new();
