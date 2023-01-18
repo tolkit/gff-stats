@@ -1,107 +1,102 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/utils.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>utils.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../gff_stats/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../gff_stats/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../gff_stats/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
-<span id="2">  2</span>
-<span id="3">  3</span>
-<span id="4">  4</span>
-<span id="5">  5</span>
-<span id="6">  6</span>
-<span id="7">  7</span>
-<span id="8">  8</span>
-<span id="9">  9</span>
-<span id="10"> 10</span>
-<span id="11"> 11</span>
-<span id="12"> 12</span>
-<span id="13"> 13</span>
-<span id="14"> 14</span>
-<span id="15"> 15</span>
-<span id="16"> 16</span>
-<span id="17"> 17</span>
-<span id="18"> 18</span>
-<span id="19"> 19</span>
-<span id="20"> 20</span>
-<span id="21"> 21</span>
-<span id="22"> 22</span>
-<span id="23"> 23</span>
-<span id="24"> 24</span>
-<span id="25"> 25</span>
-<span id="26"> 26</span>
-<span id="27"> 27</span>
-<span id="28"> 28</span>
-<span id="29"> 29</span>
-<span id="30"> 30</span>
-<span id="31"> 31</span>
-<span id="32"> 32</span>
-<span id="33"> 33</span>
-<span id="34"> 34</span>
-<span id="35"> 35</span>
-<span id="36"> 36</span>
-<span id="37"> 37</span>
-<span id="38"> 38</span>
-<span id="39"> 39</span>
-<span id="40"> 40</span>
-<span id="41"> 41</span>
-<span id="42"> 42</span>
-<span id="43"> 43</span>
-<span id="44"> 44</span>
-<span id="45"> 45</span>
-<span id="46"> 46</span>
-<span id="47"> 47</span>
-<span id="48"> 48</span>
-<span id="49"> 49</span>
-<span id="50"> 50</span>
-<span id="51"> 51</span>
-<span id="52"> 52</span>
-<span id="53"> 53</span>
-<span id="54"> 54</span>
-<span id="55"> 55</span>
-<span id="56"> 56</span>
-<span id="57"> 57</span>
-<span id="58"> 58</span>
-<span id="59"> 59</span>
-<span id="60"> 60</span>
-<span id="61"> 61</span>
-<span id="62"> 62</span>
-<span id="63"> 63</span>
-<span id="64"> 64</span>
-<span id="65"> 65</span>
-<span id="66"> 66</span>
-<span id="67"> 67</span>
-<span id="68"> 68</span>
-<span id="69"> 69</span>
-<span id="70"> 70</span>
-<span id="71"> 71</span>
-<span id="72"> 72</span>
-<span id="73"> 73</span>
-<span id="74"> 74</span>
-<span id="75"> 75</span>
-<span id="76"> 76</span>
-<span id="77"> 77</span>
-<span id="78"> 78</span>
-<span id="79"> 79</span>
-<span id="80"> 80</span>
-<span id="81"> 81</span>
-<span id="82"> 82</span>
-<span id="83"> 83</span>
-<span id="84"> 84</span>
-<span id="85"> 85</span>
-<span id="86"> 86</span>
-<span id="87"> 87</span>
-<span id="88"> 88</span>
-<span id="89"> 89</span>
-<span id="90"> 90</span>
-<span id="91"> 91</span>
-<span id="92"> 92</span>
-<span id="93"> 93</span>
-<span id="94"> 94</span>
-<span id="95"> 95</span>
-<span id="96"> 96</span>
-<span id="97"> 97</span>
-<span id="98"> 98</span>
-<span id="99"> 99</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/utils.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>utils.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../gff_stats/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
@@ -314,317 +309,424 @@
 <span id="309">309</span>
 <span id="310">310</span>
 <span id="311">311</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
-<span class="kw">use</span> <span class="ident">std::str</span>;
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+</pre><pre class="rust"><code><span class="kw">use </span>clap::{ValueEnum, builder::PossibleValue};
+<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::str::{<span class="self">self</span>, FromStr};
 
-<span class="doccomment">/// Taken directly from `&lt;https://github.com/dweb0/protein-translate/blob/master/src/lib.rs&gt;`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">translate</span>(<span class="ident">seq</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">String</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peptide</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="ident">seq</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="number">3</span>);
+<span class="attribute">#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+</span><span class="kw">pub enum </span>Degeneracy {
+    Fourfold,
+    Sixfold,
+}
 
-    <span class="lifetime">&#39;outer</span>: <span class="kw">for</span> <span class="ident">triplet</span> <span class="kw">in</span> <span class="ident">seq</span>.<span class="ident">chunks_exact</span>(<span class="number">3</span>) {
-        <span class="kw">for</span> <span class="ident">c</span> <span class="kw">in</span> <span class="ident">triplet</span> {
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">c</span>.<span class="ident">is_ascii</span>() {
-                <span class="ident">peptide</span>.<span class="ident">push</span>(<span class="string">&#39;X&#39;</span>);
-                <span class="kw">continue</span> <span class="lifetime">&#39;outer</span>;
+<span class="comment">// Can also be derived with feature flag `derive`
+</span><span class="kw">impl </span>ValueEnum <span class="kw">for </span>Degeneracy {
+    <span class="kw">fn </span>value_variants&lt;<span class="lifetime">&#39;a</span>&gt;() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[<span class="self">Self</span>] {
+        <span class="kw-2">&amp;</span>[Degeneracy::Fourfold, Degeneracy::Sixfold]
+    }
+
+    <span class="kw">fn </span>to_possible_value&lt;<span class="lifetime">&#39;a</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;PossibleValue&gt; {
+        <span class="prelude-val">Some</span>(<span class="kw">match </span><span class="self">self </span>{
+            Degeneracy::Fourfold =&gt; PossibleValue::new(<span class="string">&quot;fourfold&quot;</span>).help(<span class="string">&quot;Run calculations on fourfold degenerate sites&quot;</span>),
+            Degeneracy::Sixfold =&gt; PossibleValue::new(<span class="string">&quot;sixfold&quot;</span>).help(<span class="string">&quot;Run calculations on sizfold degenerate sites&quot;</span>),
+        })
+    }
+}
+
+<span class="kw">impl </span>std::fmt::Display <span class="kw">for </span>Degeneracy {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="self">self</span>.to_possible_value()
+            .expect(<span class="string">&quot;no values are skipped&quot;</span>)
+            .get_name()
+            .fmt(f)
+    }
+}
+
+<span class="kw">impl </span>FromStr <span class="kw">for </span>Degeneracy {
+    <span class="kw">type </span><span class="prelude-val">Err </span>= String;
+
+    <span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+        <span class="kw">for </span>variant <span class="kw">in </span><span class="self">Self</span>::value_variants() {
+            <span class="kw">if </span>variant.to_possible_value().unwrap().matches(s, <span class="bool-val">false</span>) {
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="kw-2">*</span>variant);
+            }
+        }
+        <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;invalid variant: {}&quot;</span>, s))
+    }
+}
+
+<span class="doccomment">/// Taken directly from `&lt;https://github.com/dweb0/protein-translate/blob/master/src/lib.rs&gt;`
+</span><span class="kw">pub fn </span>translate(seq: <span class="kw-2">&amp;</span>[u8]) -&gt; String {
+    <span class="kw">let </span><span class="kw-2">mut </span>peptide = String::with_capacity(seq.len() / <span class="number">3</span>);
+
+    <span class="lifetime">&#39;outer</span>: <span class="kw">for </span>triplet <span class="kw">in </span>seq.chunks_exact(<span class="number">3</span>) {
+        <span class="kw">for </span>c <span class="kw">in </span>triplet {
+            <span class="kw">if </span>!c.is_ascii() {
+                peptide.push(<span class="string">&#39;X&#39;</span>);
+                <span class="kw">continue </span><span class="lifetime">&#39;outer</span>;
             }
         }
 
-        <span class="kw">let</span> <span class="ident">c1</span> <span class="op">=</span> <span class="ident">ASCII_TO_INDEX</span>[<span class="ident">triplet</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">usize</span>];
-        <span class="kw">let</span> <span class="ident">c2</span> <span class="op">=</span> <span class="ident">ASCII_TO_INDEX</span>[<span class="ident">triplet</span>[<span class="number">1</span>] <span class="kw">as</span> <span class="ident">usize</span>];
-        <span class="kw">let</span> <span class="ident">c3</span> <span class="op">=</span> <span class="ident">ASCII_TO_INDEX</span>[<span class="ident">triplet</span>[<span class="number">2</span>] <span class="kw">as</span> <span class="ident">usize</span>];
+        <span class="kw">let </span>c1 = ASCII_TO_INDEX[triplet[<span class="number">0</span>] <span class="kw">as </span>usize];
+        <span class="kw">let </span>c2 = ASCII_TO_INDEX[triplet[<span class="number">1</span>] <span class="kw">as </span>usize];
+        <span class="kw">let </span>c3 = ASCII_TO_INDEX[triplet[<span class="number">2</span>] <span class="kw">as </span>usize];
 
-        <span class="kw">let</span> <span class="ident">amino_acid</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">c1</span> <span class="op">==</span> <span class="number">4</span> <span class="op">|</span><span class="op">|</span> <span class="ident">c2</span> <span class="op">==</span> <span class="number">4</span> <span class="op">|</span><span class="op">|</span> <span class="ident">c3</span> <span class="op">==</span> <span class="number">4</span> {
-            <span class="string">&#39;X&#39;</span>
-        } <span class="kw">else</span> {
-            <span class="ident">AA_TABLE_CANONICAL</span>[<span class="ident">c1</span>][<span class="ident">c2</span>][<span class="ident">c3</span>]
+        <span class="kw">let </span>amino_acid = <span class="kw">if </span>c1 == <span class="number">4 </span>|| c2 == <span class="number">4 </span>|| c3 == <span class="number">4 </span>{
+            <span class="string">&#39;X&#39;
+        </span>} <span class="kw">else </span>{
+            AA_TABLE_CANONICAL[c1][c2][c3]
         };
 
-        <span class="ident">peptide</span>.<span class="ident">push</span>(<span class="ident">amino_acid</span>);
+        peptide.push(amino_acid);
     }
-    <span class="ident">peptide</span>
+    peptide
 }
 
-<span class="doccomment">/// `&lt;https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi&gt;`</span>
-<span class="doccomment">/// U is equivalent to T here</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The 1st index picks the 4x4 block</span>
-<span class="doccomment">/// The 2nd index picks the row</span>
-<span class="doccomment">/// the 3rd index picks the column</span>
-<span class="kw">static</span> <span class="ident">AA_TABLE_CANONICAL</span>: [[[<span class="ident">char</span>; <span class="number">4</span>]; <span class="number">4</span>]; <span class="number">4</span>] <span class="op">=</span> [
+<span class="doccomment">/// `&lt;https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi&gt;`
+/// U is equivalent to T here
+///
+/// The 1st index picks the 4x4 block
+/// The 2nd index picks the row
+/// the 3rd index picks the column
+</span><span class="kw">static </span>AA_TABLE_CANONICAL: [[[char; <span class="number">4</span>]; <span class="number">4</span>]; <span class="number">4</span>] = [
     [
-        [<span class="string">&#39;K&#39;</span>, <span class="string">&#39;N&#39;</span>, <span class="string">&#39;K&#39;</span>, <span class="string">&#39;N&#39;</span>], <span class="comment">// AAA, AAC, AAG, AAU/AAT</span>
-        [<span class="string">&#39;T&#39;</span>, <span class="string">&#39;T&#39;</span>, <span class="string">&#39;T&#39;</span>, <span class="string">&#39;T&#39;</span>], <span class="comment">// ACA, ACC, ACG, ACU/ACT</span>
-        [<span class="string">&#39;R&#39;</span>, <span class="string">&#39;S&#39;</span>, <span class="string">&#39;R&#39;</span>, <span class="string">&#39;S&#39;</span>], <span class="comment">// AGA, AGC, AGG, AGU/AGT</span>
-        [<span class="string">&#39;I&#39;</span>, <span class="string">&#39;I&#39;</span>, <span class="string">&#39;M&#39;</span>, <span class="string">&#39;I&#39;</span>], <span class="comment">// AUA/ATA, AUC/ATC, AUG/ATG, AUU/ATT</span>
-    ],
+        [<span class="string">&#39;K&#39;</span>, <span class="string">&#39;N&#39;</span>, <span class="string">&#39;K&#39;</span>, <span class="string">&#39;N&#39;</span>], <span class="comment">// AAA, AAC, AAG, AAU/AAT
+        </span>[<span class="string">&#39;T&#39;</span>, <span class="string">&#39;T&#39;</span>, <span class="string">&#39;T&#39;</span>, <span class="string">&#39;T&#39;</span>], <span class="comment">// ACA, ACC, ACG, ACU/ACT
+        </span>[<span class="string">&#39;R&#39;</span>, <span class="string">&#39;S&#39;</span>, <span class="string">&#39;R&#39;</span>, <span class="string">&#39;S&#39;</span>], <span class="comment">// AGA, AGC, AGG, AGU/AGT
+        </span>[<span class="string">&#39;I&#39;</span>, <span class="string">&#39;I&#39;</span>, <span class="string">&#39;M&#39;</span>, <span class="string">&#39;I&#39;</span>], <span class="comment">// AUA/ATA, AUC/ATC, AUG/ATG, AUU/ATT
+    </span>],
     [
-        [<span class="string">&#39;Q&#39;</span>, <span class="string">&#39;H&#39;</span>, <span class="string">&#39;Q&#39;</span>, <span class="string">&#39;H&#39;</span>], <span class="comment">// CAA, CAC, CAG, CAU/CAT</span>
-        [<span class="string">&#39;P&#39;</span>, <span class="string">&#39;P&#39;</span>, <span class="string">&#39;P&#39;</span>, <span class="string">&#39;P&#39;</span>], <span class="comment">// CCA, CCC, CCG, CCU/CCT</span>
-        [<span class="string">&#39;R&#39;</span>, <span class="string">&#39;R&#39;</span>, <span class="string">&#39;R&#39;</span>, <span class="string">&#39;R&#39;</span>], <span class="comment">// CGA, CGC, CGG, CGU/CGT</span>
-        [<span class="string">&#39;L&#39;</span>, <span class="string">&#39;L&#39;</span>, <span class="string">&#39;L&#39;</span>, <span class="string">&#39;L&#39;</span>], <span class="comment">// CUA/CTA, CUC/CTC, CUG/CTG, CUU/CTT</span>
-    ],
+        [<span class="string">&#39;Q&#39;</span>, <span class="string">&#39;H&#39;</span>, <span class="string">&#39;Q&#39;</span>, <span class="string">&#39;H&#39;</span>], <span class="comment">// CAA, CAC, CAG, CAU/CAT
+        </span>[<span class="string">&#39;P&#39;</span>, <span class="string">&#39;P&#39;</span>, <span class="string">&#39;P&#39;</span>, <span class="string">&#39;P&#39;</span>], <span class="comment">// CCA, CCC, CCG, CCU/CCT
+        </span>[<span class="string">&#39;R&#39;</span>, <span class="string">&#39;R&#39;</span>, <span class="string">&#39;R&#39;</span>, <span class="string">&#39;R&#39;</span>], <span class="comment">// CGA, CGC, CGG, CGU/CGT
+        </span>[<span class="string">&#39;L&#39;</span>, <span class="string">&#39;L&#39;</span>, <span class="string">&#39;L&#39;</span>, <span class="string">&#39;L&#39;</span>], <span class="comment">// CUA/CTA, CUC/CTC, CUG/CTG, CUU/CTT
+    </span>],
     [
-        [<span class="string">&#39;E&#39;</span>, <span class="string">&#39;D&#39;</span>, <span class="string">&#39;E&#39;</span>, <span class="string">&#39;D&#39;</span>], <span class="comment">// GAA, GAC, GAG, GAU/GAT</span>
-        [<span class="string">&#39;A&#39;</span>, <span class="string">&#39;A&#39;</span>, <span class="string">&#39;A&#39;</span>, <span class="string">&#39;A&#39;</span>], <span class="comment">// GCA, GCC, GCG, GCU/GCT</span>
-        [<span class="string">&#39;G&#39;</span>, <span class="string">&#39;G&#39;</span>, <span class="string">&#39;G&#39;</span>, <span class="string">&#39;G&#39;</span>], <span class="comment">// GGA, GGC, GGG, GGU/GGT</span>
-        [<span class="string">&#39;V&#39;</span>, <span class="string">&#39;V&#39;</span>, <span class="string">&#39;V&#39;</span>, <span class="string">&#39;V&#39;</span>], <span class="comment">// GUA/GTA, GUC/GTC, GUG/GTG, GUU/GTT</span>
-    ],
+        [<span class="string">&#39;E&#39;</span>, <span class="string">&#39;D&#39;</span>, <span class="string">&#39;E&#39;</span>, <span class="string">&#39;D&#39;</span>], <span class="comment">// GAA, GAC, GAG, GAU/GAT
+        </span>[<span class="string">&#39;A&#39;</span>, <span class="string">&#39;A&#39;</span>, <span class="string">&#39;A&#39;</span>, <span class="string">&#39;A&#39;</span>], <span class="comment">// GCA, GCC, GCG, GCU/GCT
+        </span>[<span class="string">&#39;G&#39;</span>, <span class="string">&#39;G&#39;</span>, <span class="string">&#39;G&#39;</span>, <span class="string">&#39;G&#39;</span>], <span class="comment">// GGA, GGC, GGG, GGU/GGT
+        </span>[<span class="string">&#39;V&#39;</span>, <span class="string">&#39;V&#39;</span>, <span class="string">&#39;V&#39;</span>, <span class="string">&#39;V&#39;</span>], <span class="comment">// GUA/GTA, GUC/GTC, GUG/GTG, GUU/GTT
+    </span>],
     [
-        [<span class="string">&#39;*&#39;</span>, <span class="string">&#39;Y&#39;</span>, <span class="string">&#39;*&#39;</span>, <span class="string">&#39;Y&#39;</span>], <span class="comment">// UAA/TAA, UAC/TAC, UAG/TAG, UAU/TAT</span>
-        [<span class="string">&#39;S&#39;</span>, <span class="string">&#39;S&#39;</span>, <span class="string">&#39;S&#39;</span>, <span class="string">&#39;S&#39;</span>], <span class="comment">// UCA/TCA, UCC/TCC, UCG/TCG, UCU/TCT</span>
-        [<span class="string">&#39;*&#39;</span>, <span class="string">&#39;C&#39;</span>, <span class="string">&#39;W&#39;</span>, <span class="string">&#39;C&#39;</span>], <span class="comment">// UGA/TGA, UGC/TGC, UGG/TGG, UGU/TGT</span>
-        [<span class="string">&#39;L&#39;</span>, <span class="string">&#39;F&#39;</span>, <span class="string">&#39;L&#39;</span>, <span class="string">&#39;F&#39;</span>], <span class="comment">// UUA/TTA, UUC/TTC, UUG/TTG, UUU/TTT</span>
-    ],
+        [<span class="string">&#39;*&#39;</span>, <span class="string">&#39;Y&#39;</span>, <span class="string">&#39;*&#39;</span>, <span class="string">&#39;Y&#39;</span>], <span class="comment">// UAA/TAA, UAC/TAC, UAG/TAG, UAU/TAT
+        </span>[<span class="string">&#39;S&#39;</span>, <span class="string">&#39;S&#39;</span>, <span class="string">&#39;S&#39;</span>, <span class="string">&#39;S&#39;</span>], <span class="comment">// UCA/TCA, UCC/TCC, UCG/TCG, UCU/TCT
+        </span>[<span class="string">&#39;*&#39;</span>, <span class="string">&#39;C&#39;</span>, <span class="string">&#39;W&#39;</span>, <span class="string">&#39;C&#39;</span>], <span class="comment">// UGA/TGA, UGC/TGC, UGG/TGG, UGU/TGT
+        </span>[<span class="string">&#39;L&#39;</span>, <span class="string">&#39;F&#39;</span>, <span class="string">&#39;L&#39;</span>, <span class="string">&#39;F&#39;</span>], <span class="comment">// UUA/TTA, UUC/TTC, UUG/TTG, UUU/TTT
+    </span>],
 ];
 
-<span class="doccomment">/// Maps an ASCII character to array index.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// A = 65, a = 97  =&gt; 0</span>
-<span class="doccomment">/// C = 67, c = 99  =&gt; 1</span>
-<span class="doccomment">/// G = 71, g = 103 =&gt; 2</span>
-<span class="doccomment">/// T = 84, t = 116 =&gt; 3</span>
-<span class="doccomment">/// U = 85, u = 117 =&gt; 3</span>
-<span class="kw">static</span> <span class="ident">ASCII_TO_INDEX</span>: [<span class="ident">usize</span>; <span class="number">128</span>] <span class="op">=</span> [
-    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 0-15</span>
-    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 16-31</span>
-    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 32-47</span>
-    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 48-63</span>
-    <span class="number">4</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 64-79    (65 = A, 67 = C, 71 = G)</span>
-    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 80-95    (84 = T, 85 = U)</span>
-    <span class="number">4</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 96-111   (97 = a, 99 = c, 103 = g)</span>
-    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 112-127  (116 = t, 117 = u)</span>
-];
+<span class="doccomment">/// Maps an ASCII character to array index.
+///
+/// A = 65, a = 97  =&gt; 0
+/// C = 67, c = 99  =&gt; 1
+/// G = 71, g = 103 =&gt; 2
+/// T = 84, t = 116 =&gt; 3
+/// U = 85, u = 117 =&gt; 3
+</span><span class="kw">static </span>ASCII_TO_INDEX: [usize; <span class="number">128</span>] = [
+    <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 0-15
+    </span><span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 16-31
+    </span><span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 32-47
+    </span><span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 48-63
+    </span><span class="number">4</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 64-79    (65 = A, 67 = C, 71 = G)
+    </span><span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 80-95    (84 = T, 85 = U)
+    </span><span class="number">4</span>, <span class="number">0</span>, <span class="number">4</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 96-111   (97 = a, 99 = c, 103 = g)
+    </span><span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="comment">// 112-127  (116 = t, 117 = u)
+</span>];
 
-<span class="doccomment">/// The fourfold degenerate codons.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">FOURFOLD_DEG</span>: [<span class="kw-2">&amp;</span><span class="ident">str</span>; <span class="number">32</span>] <span class="op">=</span> [
+<span class="doccomment">/// The fourfold degenerate codons.
+</span><span class="kw">pub const </span>FOURFOLD_DEG: [<span class="kw-2">&amp;</span>str; <span class="number">32</span>] = [
     <span class="string">&quot;CTT&quot;</span>, <span class="string">&quot;CTA&quot;</span>, <span class="string">&quot;CTG&quot;</span>, <span class="string">&quot;CTC&quot;</span>, <span class="string">&quot;GTT&quot;</span>, <span class="string">&quot;GTC&quot;</span>, <span class="string">&quot;GTA&quot;</span>, <span class="string">&quot;GTG&quot;</span>, <span class="string">&quot;TCT&quot;</span>, <span class="string">&quot;TCC&quot;</span>, <span class="string">&quot;TCA&quot;</span>, <span class="string">&quot;TCG&quot;</span>, <span class="string">&quot;CCT&quot;</span>,
     <span class="string">&quot;CCC&quot;</span>, <span class="string">&quot;CCA&quot;</span>, <span class="string">&quot;CCG&quot;</span>, <span class="string">&quot;ACT&quot;</span>, <span class="string">&quot;ACC&quot;</span>, <span class="string">&quot;ACA&quot;</span>, <span class="string">&quot;ACG&quot;</span>, <span class="string">&quot;GCT&quot;</span>, <span class="string">&quot;GCC&quot;</span>, <span class="string">&quot;GCA&quot;</span>, <span class="string">&quot;GCG&quot;</span>, <span class="string">&quot;CGT&quot;</span>, <span class="string">&quot;CGC&quot;</span>,
     <span class="string">&quot;CGA&quot;</span>, <span class="string">&quot;CGG&quot;</span>, <span class="string">&quot;GGT&quot;</span>, <span class="string">&quot;GGC&quot;</span>, <span class="string">&quot;GGA&quot;</span>, <span class="string">&quot;GGG&quot;</span>,
 ];
 
-<span class="doccomment">/// The sixfold degenerate codons. Includes Leucine, Serine and Arginine.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SIXFOLD_DEG</span>: [<span class="kw-2">&amp;</span><span class="ident">str</span>; <span class="number">38</span>] <span class="op">=</span> [
+<span class="doccomment">/// The sixfold degenerate codons. Includes Leucine, Serine and Arginine.
+</span><span class="kw">pub const </span>SIXFOLD_DEG: [<span class="kw-2">&amp;</span>str; <span class="number">38</span>] = [
     <span class="string">&quot;TTA&quot;</span>, <span class="string">&quot;TTG&quot;</span>, <span class="string">&quot;CTT&quot;</span>, <span class="string">&quot;CTA&quot;</span>, <span class="string">&quot;CTG&quot;</span>, <span class="string">&quot;CTC&quot;</span>, <span class="string">&quot;GTT&quot;</span>, <span class="string">&quot;GTC&quot;</span>, <span class="string">&quot;GTA&quot;</span>, <span class="string">&quot;GTG&quot;</span>, <span class="string">&quot;TCT&quot;</span>, <span class="string">&quot;TCC&quot;</span>, <span class="string">&quot;TCA&quot;</span>,
     <span class="string">&quot;TCG&quot;</span>, <span class="string">&quot;AGT&quot;</span>, <span class="string">&quot;AGC&quot;</span>, <span class="string">&quot;CCT&quot;</span>, <span class="string">&quot;CCC&quot;</span>, <span class="string">&quot;CCA&quot;</span>, <span class="string">&quot;CCG&quot;</span>, <span class="string">&quot;ACT&quot;</span>, <span class="string">&quot;ACC&quot;</span>, <span class="string">&quot;ACA&quot;</span>, <span class="string">&quot;ACG&quot;</span>, <span class="string">&quot;GCT&quot;</span>, <span class="string">&quot;GCC&quot;</span>,
     <span class="string">&quot;GCA&quot;</span>, <span class="string">&quot;GCG&quot;</span>, <span class="string">&quot;CGT&quot;</span>, <span class="string">&quot;CGC&quot;</span>, <span class="string">&quot;CGA&quot;</span>, <span class="string">&quot;CGG&quot;</span>, <span class="string">&quot;AGA&quot;</span>, <span class="string">&quot;AGG&quot;</span>, <span class="string">&quot;GGT&quot;</span>, <span class="string">&quot;GGC&quot;</span>, <span class="string">&quot;GGA&quot;</span>, <span class="string">&quot;GGG&quot;</span>,
 ];
 
-<span class="doccomment">/// Statistics on the whole sequence.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Stats</span> {
-    <span class="kw">pub</span> <span class="ident">gc_percent</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">at_percent</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">gc_skew</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">at_skew</span>: <span class="ident">f64</span>,
+<span class="doccomment">/// Statistics on the whole sequence.
+</span><span class="kw">pub struct </span>Stats {
+    <span class="kw">pub </span>gc_percent: f64,
+    <span class="kw">pub </span>at_percent: f64,
+    <span class="kw">pub </span>gc_skew: f64,
+    <span class="kw">pub </span>at_skew: f64,
 }
 
-<span class="doccomment">/// Simply calculate basic statistics on a [`&amp;str`].</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">whole_seq_stats</span>(<span class="ident">dna</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">Stats</span> {
-    <span class="comment">// chars uses quite a bit more memory here</span>
-    <span class="comment">// but sequences should never be super long...</span>
-    <span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">dna</span>.<span class="ident">chars</span>().<span class="ident">fold</span>(<span class="ident">HashMap::new</span>(), <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">map</span>, <span class="ident">c</span><span class="op">|</span> {
-        <span class="kw-2">*</span><span class="ident">map</span>.<span class="ident">entry</span>(<span class="ident">c</span>).<span class="ident">or_insert</span>(<span class="number">0</span>) <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-        <span class="ident">map</span>
+<span class="doccomment">/// Simply calculate basic statistics on a [`&amp;str`].
+</span><span class="kw">pub fn </span>whole_seq_stats(dna: <span class="kw-2">&amp;</span>str) -&gt; Stats {
+    <span class="comment">// chars uses quite a bit more memory here
+    // but sequences should never be super long...
+    </span><span class="kw">let </span>map = dna.chars().fold(HashMap::new(), |<span class="kw-2">mut </span>map, c| {
+        <span class="kw-2">*</span>map.entry(c).or_insert(<span class="number">0</span>) += <span class="number">1</span>;
+        map
     });
-    <span class="kw">let</span> <span class="ident">g_counts</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="string">&#39;G&#39;</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="number">0</span>);
-    <span class="kw">let</span> <span class="ident">c_counts</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="string">&#39;C&#39;</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="number">0</span>);
-    <span class="kw">let</span> <span class="ident">a_counts</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="string">&#39;A&#39;</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="number">0</span>);
-    <span class="kw">let</span> <span class="ident">t_counts</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="string">&#39;T&#39;</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="number">0</span>);
+    <span class="kw">let </span>g_counts = map.get(<span class="kw-2">&amp;</span><span class="string">&#39;G&#39;</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="number">0</span>);
+    <span class="kw">let </span>c_counts = map.get(<span class="kw-2">&amp;</span><span class="string">&#39;C&#39;</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="number">0</span>);
+    <span class="kw">let </span>a_counts = map.get(<span class="kw-2">&amp;</span><span class="string">&#39;A&#39;</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="number">0</span>);
+    <span class="kw">let </span>t_counts = map.get(<span class="kw-2">&amp;</span><span class="string">&#39;T&#39;</span>).unwrap_or(<span class="kw-2">&amp;</span><span class="number">0</span>);
 
-    <span class="ident">Stats</span> {
-        <span class="ident">gc_percent</span>: (<span class="ident">g_counts</span> <span class="op">+</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">dna</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">at_percent</span>: (<span class="ident">a_counts</span> <span class="op">+</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">dna</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">gc_skew</span>: (<span class="ident">g_counts</span> <span class="op">-</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> (<span class="ident">g_counts</span> <span class="op">+</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">at_skew</span>: (<span class="ident">a_counts</span> <span class="op">-</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> (<span class="ident">a_counts</span> <span class="op">+</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span>,
+    Stats {
+        gc_percent: (g_counts + c_counts) <span class="kw">as </span>f64 / dna.len() <span class="kw">as </span>f64,
+        at_percent: (a_counts + t_counts) <span class="kw">as </span>f64 / dna.len() <span class="kw">as </span>f64,
+        gc_skew: (g_counts - c_counts) <span class="kw">as </span>f64 / (g_counts + c_counts) <span class="kw">as </span>f64,
+        at_skew: (a_counts - t_counts) <span class="kw">as </span>f64 / (a_counts + t_counts) <span class="kw">as </span>f64,
     }
 }
 
-<span class="doccomment">/// Statistics on the 4-fold-degenerate-sites.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FourFoldStats</span> {
-    <span class="kw">pub</span> <span class="ident">gc_percent</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">at_percent</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">gc_skew</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">at_skew</span>: <span class="ident">f64</span>,
+<span class="doccomment">/// Statistics on the 4-fold-degenerate-sites.
+</span><span class="kw">pub struct </span>FourFoldStats {
+    <span class="kw">pub </span>gc_percent: f64,
+    <span class="kw">pub </span>at_percent: f64,
+    <span class="kw">pub </span>gc_skew: f64,
+    <span class="kw">pub </span>at_skew: f64,
 }
 
-<span class="doccomment">/// Take the vector of degenerate codons and calculate statistics.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">four_fold_site_stats</span>(<span class="ident">codons</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">FourFoldStats</span> {
-    <span class="kw">let</span> <span class="ident">codon_vec</span> <span class="op">=</span> <span class="ident">codons</span>
-        .<span class="ident">into_iter</span>()
-        .<span class="ident">map</span>(<span class="ident">str::from_utf8</span>)
-        .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-        .<span class="ident">unwrap_or</span>(<span class="macro">vec!</span>[]);
+<span class="doccomment">/// Take the vector of degenerate codons and calculate statistics.
+</span><span class="kw">pub fn </span>four_fold_site_stats(codons: Vec&lt;<span class="kw-2">&amp;</span>[u8]&gt;) -&gt; FourFoldStats {
+    <span class="kw">let </span>codon_vec = codons
+        .into_iter()
+        .map(str::from_utf8)
+        .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>str&gt;, <span class="kw">_</span>&gt;&gt;()
+        .unwrap_or(<span class="macro">vec!</span>[]);
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g_counts</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c_counts</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">a_counts</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t_counts</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>g_counts = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>c_counts = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>a_counts = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>t_counts = <span class="number">0</span>;
 
-    <span class="kw">for</span> <span class="ident">codon</span> <span class="kw">in</span> <span class="ident">codon_vec</span>.<span class="ident">iter</span>() {
-        <span class="kw">let</span> <span class="ident">split_tuple</span> <span class="op">=</span> <span class="ident">codon</span>.<span class="ident">split_at</span>(<span class="number">2</span>);
+    <span class="kw">for </span>codon <span class="kw">in </span>codon_vec.iter() {
+        <span class="kw">let </span>split_tuple = codon.split_at(<span class="number">2</span>);
 
-        <span class="kw">match</span> <span class="ident">split_tuple</span>.<span class="number">1</span> {
-            <span class="string">&quot;G&quot;</span> =&gt; <span class="ident">g_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;g&quot;</span> =&gt; <span class="ident">g_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;C&quot;</span> =&gt; <span class="ident">c_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;c&quot;</span> =&gt; <span class="ident">c_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;A&quot;</span> =&gt; <span class="ident">a_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;a&quot;</span> =&gt; <span class="ident">a_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;T&quot;</span> =&gt; <span class="ident">t_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="string">&quot;t&quot;</span> =&gt; <span class="ident">t_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw">_</span> =&gt; (),
+        <span class="kw">match </span>split_tuple.<span class="number">1 </span>{
+            <span class="string">&quot;G&quot; </span>=&gt; g_counts += <span class="number">1</span>,
+            <span class="string">&quot;g&quot; </span>=&gt; g_counts += <span class="number">1</span>,
+            <span class="string">&quot;C&quot; </span>=&gt; c_counts += <span class="number">1</span>,
+            <span class="string">&quot;c&quot; </span>=&gt; c_counts += <span class="number">1</span>,
+            <span class="string">&quot;A&quot; </span>=&gt; a_counts += <span class="number">1</span>,
+            <span class="string">&quot;a&quot; </span>=&gt; a_counts += <span class="number">1</span>,
+            <span class="string">&quot;T&quot; </span>=&gt; t_counts += <span class="number">1</span>,
+            <span class="string">&quot;t&quot; </span>=&gt; t_counts += <span class="number">1</span>,
+            <span class="kw">_ </span>=&gt; (),
         }
     }
-    <span class="ident">FourFoldStats</span> {
-        <span class="ident">gc_percent</span>: (<span class="ident">g_counts</span> <span class="op">+</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">codon_vec</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">at_percent</span>: (<span class="ident">a_counts</span> <span class="op">+</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">codon_vec</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">gc_skew</span>: (<span class="ident">g_counts</span> <span class="op">-</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> (<span class="ident">g_counts</span> <span class="op">+</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">at_skew</span>: (<span class="ident">a_counts</span> <span class="op">-</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> (<span class="ident">a_counts</span> <span class="op">+</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span>,
+    FourFoldStats {
+        gc_percent: (g_counts + c_counts) <span class="kw">as </span>f64 / codon_vec.len() <span class="kw">as </span>f64,
+        at_percent: (a_counts + t_counts) <span class="kw">as </span>f64 / codon_vec.len() <span class="kw">as </span>f64,
+        gc_skew: (g_counts - c_counts) <span class="kw">as </span>f64 / (g_counts + c_counts) <span class="kw">as </span>f64,
+        at_skew: (a_counts - t_counts) <span class="kw">as </span>f64 / (a_counts + t_counts) <span class="kw">as </span>f64,
     }
 }
 
-<span class="doccomment">/// Take a trimmed sequence and return a vector of four/sixfold degenerate codons.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gc_four_fold_deg_sites</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">dna</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">degeneracy</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">dna</span>.<span class="ident">as_bytes</span>();
-    <span class="kw">let</span> <span class="ident">codon_iterator</span> <span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">chunks</span>(<span class="number">3</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">collector</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+<span class="doccomment">/// Take a trimmed sequence and return a vector of four/sixfold degenerate codons.
+</span><span class="kw">pub fn </span>gc_four_fold_deg_sites&lt;<span class="lifetime">&#39;a</span>&gt;(dna: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, degeneracy: <span class="kw-2">&amp;</span>Degeneracy) -&gt; Vec&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; {
+    <span class="kw">let </span>bytes = dna.as_bytes();
+    <span class="kw">let </span>codon_iterator = bytes.chunks(<span class="number">3</span>);
+    <span class="kw">let </span><span class="kw-2">mut </span>collector = Vec::new();
 
-    <span class="kw">match</span> <span class="ident">degeneracy</span> {
-        <span class="string">&quot;fourfold&quot;</span> =&gt; {
-            <span class="kw">for</span> <span class="ident">codon</span> <span class="kw">in</span> <span class="ident">codon_iterator</span> {
-                <span class="kw">let</span> <span class="ident">str_codon</span> <span class="op">=</span> <span class="ident">str::from_utf8</span>(<span class="ident">codon</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;&quot;</span>);
-                <span class="kw">if</span> <span class="ident">FOURFOLD_DEG</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">str_codon</span>.<span class="ident">to_uppercase</span>()) {
-                    <span class="ident">collector</span>.<span class="ident">push</span>(<span class="ident">codon</span>);
+    <span class="kw">match </span>degeneracy {
+        Degeneracy::Fourfold =&gt; {
+            <span class="kw">for </span>codon <span class="kw">in </span>codon_iterator {
+                <span class="kw">let </span>str_codon = str::from_utf8(codon).unwrap_or(<span class="string">&quot;&quot;</span>);
+                <span class="kw">if </span>FOURFOLD_DEG.iter().any(|<span class="kw-2">&amp;</span>i| i == str_codon.to_uppercase()) {
+                    collector.push(codon);
                 }
             }
         }
-        <span class="string">&quot;sixfold&quot;</span> =&gt; {
-            <span class="kw">for</span> <span class="ident">codon</span> <span class="kw">in</span> <span class="ident">codon_iterator</span> {
-                <span class="kw">let</span> <span class="ident">str_codon</span> <span class="op">=</span> <span class="ident">str::from_utf8</span>(<span class="ident">codon</span>).<span class="ident">unwrap_or</span>(<span class="string">&quot;&quot;</span>);
-                <span class="kw">if</span> <span class="ident">SIXFOLD_DEG</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">str_codon</span>.<span class="ident">to_uppercase</span>()) {
-                    <span class="ident">collector</span>.<span class="ident">push</span>(<span class="ident">codon</span>);
+        Degeneracy::Sixfold =&gt; {
+            <span class="kw">for </span>codon <span class="kw">in </span>codon_iterator {
+                <span class="kw">let </span>str_codon = str::from_utf8(codon).unwrap_or(<span class="string">&quot;&quot;</span>);
+                <span class="kw">if </span>SIXFOLD_DEG.iter().any(|<span class="kw-2">&amp;</span>i| i == str_codon.to_uppercase()) {
+                    collector.push(codon);
                 }
             }
         }
-        <span class="comment">// should NEVER reach here.</span>
-        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;\&quot;fourfold\&quot; or \&quot;sixfold\&quot; should be specified.&quot;</span>),
+        <span class="comment">// should NEVER reach here.
+        </span><span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;\&quot;fourfold\&quot; or \&quot;sixfold\&quot; should be specified.&quot;</span>),
     }
-    <span class="ident">collector</span>
+    collector
 }
 
-<span class="doccomment">/// GC content at the third codon position.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GC3Stats</span> {
-    <span class="kw">pub</span> <span class="ident">gc_percent</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">at_percent</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">gc_skew</span>: <span class="ident">f64</span>,
-    <span class="kw">pub</span> <span class="ident">at_skew</span>: <span class="ident">f64</span>,
+<span class="doccomment">/// GC content at the third codon position.
+</span><span class="attribute">#[derive(Default)]
+</span><span class="kw">pub struct </span>GC3Stats {
+    <span class="kw">pub </span>gc_percent: f64,
+    <span class="kw">pub </span>at_percent: f64,
+    <span class="kw">pub </span>gc_skew: f64,
+    <span class="kw">pub </span>at_skew: f64,
 }
 
-<span class="doccomment">/// Calculate the GC content of the third position of a codon.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gc_3</span>(<span class="ident">dna</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">GC3Stats</span> {
-    <span class="kw">let</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">dna</span>.<span class="ident">as_bytes</span>().<span class="ident">chunks</span>(<span class="number">3</span>);
+<span class="doccomment">/// Calculate the GC content of the third position of a codon.
+</span><span class="kw">pub fn </span>gc_3(dna: <span class="kw-2">&amp;</span>str, id: <span class="prelude-ty">Option</span>&lt;String&gt;) -&gt; GC3Stats {
+    <span class="kw">let </span>dna_length = dna.len();
+    <span class="kw">let </span>will_work = (dna_length % <span class="number">3</span>) == <span class="number">0</span>;
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">third_pos</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-
-    <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="ident">iter</span> {
-        <span class="kw">let</span> <span class="ident">split_tuple</span> <span class="op">=</span> <span class="ident">i</span>.<span class="ident">split_at</span>(<span class="number">2</span>);
-        <span class="ident">third_pos</span>.<span class="ident">push</span>(<span class="ident">split_tuple</span>.<span class="number">1</span>);
+    <span class="kw">if </span>!will_work {
+        <span class="macro">eprintln!</span>(
+            <span class="string">&quot;[-]\tWarning, GC3 could not be calculated for: {}&quot;</span>,
+            id.unwrap_or(<span class="string">&quot;&quot;</span>.into())
+        );
+        <span class="kw">return </span>GC3Stats::default();
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g_counts</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c_counts</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">a_counts</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t_counts</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="kw">let </span>iter = dna.as_bytes().chunks(<span class="number">3</span>);
 
-    <span class="comment">// match lowercase bases too?</span>
-    <span class="kw">for</span> <span class="ident">base</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">third_pos</span> {
-        <span class="kw">match</span> <span class="ident">base</span> {
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;G&#39;</span>] =&gt; <span class="ident">g_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;g&#39;</span>] =&gt; <span class="ident">g_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;C&#39;</span>] =&gt; <span class="ident">c_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;c&#39;</span>] =&gt; <span class="ident">c_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;A&#39;</span>] =&gt; <span class="ident">a_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;a&#39;</span>] =&gt; <span class="ident">a_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;T&#39;</span>] =&gt; <span class="ident">t_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">b&#39;t&#39;</span>] =&gt; <span class="ident">t_counts</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw">_</span> =&gt; (),
+    <span class="kw">let </span><span class="kw-2">mut </span>third_pos = Vec::new();
+
+    <span class="kw">for </span>i <span class="kw">in </span>iter {
+        <span class="kw">let </span>split_tuple = i.split_at(<span class="number">2</span>);
+        third_pos.push(split_tuple.<span class="number">1</span>);
+    }
+
+    <span class="kw">let </span><span class="kw-2">mut </span>g_counts = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>c_counts = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>a_counts = <span class="number">0</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>t_counts = <span class="number">0</span>;
+
+    <span class="comment">// match lowercase bases too?
+    </span><span class="kw">for </span>base <span class="kw">in </span><span class="kw-2">&amp;</span>third_pos {
+        <span class="kw">match </span>base {
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;G&#39;</span>] =&gt; g_counts += <span class="number">1</span>,
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;g&#39;</span>] =&gt; g_counts += <span class="number">1</span>,
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;C&#39;</span>] =&gt; c_counts += <span class="number">1</span>,
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;c&#39;</span>] =&gt; c_counts += <span class="number">1</span>,
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;A&#39;</span>] =&gt; a_counts += <span class="number">1</span>,
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;a&#39;</span>] =&gt; a_counts += <span class="number">1</span>,
+            <span class="kw-2">&amp;</span>[<span class="string">b&#39;T&#39;</span>] | <span class="kw-2">&amp;</span>[<span class="string">b&#39;t&#39;</span>] =&gt; t_counts += <span class="number">1</span>,
+            <span class="kw">_ </span>=&gt; (),
         }
     }
-    <span class="ident">GC3Stats</span> {
-        <span class="ident">gc_percent</span>: (<span class="ident">g_counts</span> <span class="op">+</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">third_pos</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">at_percent</span>: (<span class="ident">a_counts</span> <span class="op">+</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> <span class="ident">third_pos</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">gc_skew</span>: (<span class="ident">g_counts</span> <span class="op">-</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> (<span class="ident">g_counts</span> <span class="op">+</span> <span class="ident">c_counts</span>) <span class="kw">as</span> <span class="ident">f64</span>,
-        <span class="ident">at_skew</span>: (<span class="ident">a_counts</span> <span class="op">-</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">/</span> (<span class="ident">a_counts</span> <span class="op">+</span> <span class="ident">t_counts</span>) <span class="kw">as</span> <span class="ident">f64</span>,
+    GC3Stats {
+        gc_percent: (g_counts + c_counts) <span class="kw">as </span>f64 / third_pos.len() <span class="kw">as </span>f64,
+        at_percent: (a_counts + t_counts) <span class="kw">as </span>f64 / third_pos.len() <span class="kw">as </span>f64,
+        gc_skew: (g_counts - c_counts) <span class="kw">as </span>f64 / (g_counts + c_counts) <span class="kw">as </span>f64,
+        at_skew: (a_counts - t_counts) <span class="kw">as </span>f64 / (a_counts + t_counts) <span class="kw">as </span>f64,
     }
 }
 
-<span class="doccomment">/// From the fasta sequence iteration, get the subsequence</span>
-<span class="doccomment">/// and trim the sequence depending on the frame.</span>
-<span class="doccomment">/// If the sequence is not modulo 3, force it to be so.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trim_sequence</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-    <span class="ident">seq</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
-    <span class="ident">start</span>: <span class="ident">usize</span>,
-    <span class="ident">end</span>: <span class="ident">usize</span>,
-    <span class="ident">frame</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    <span class="ident">spliced</span>: <span class="ident">bool</span>,
-) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] {
-    <span class="comment">// start and end non inclusive</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">trimmed</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">seq</span>.<span class="ident">get</span>(<span class="ident">start</span> <span class="op">-</span> <span class="number">1</span>..<span class="ident">end</span>).<span class="ident">unwrap_or</span>(<span class="string">b&quot;&quot;</span>);
+<span class="doccomment">/// From the fasta sequence iteration, get the subsequence
+/// and trim the sequence depending on the frame.
+/// If the sequence is not modulo 3, force it to be so.
+</span><span class="kw">pub fn </span>trim_sequence&lt;<span class="lifetime">&#39;a</span>&gt;(
+    seq: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8],
+    start: usize,
+    end: usize,
+    frame: <span class="kw-2">&amp;</span>str,
+    spliced: bool,
+) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] {
+    <span class="comment">// start and end non inclusive
+    </span><span class="kw">let </span><span class="kw-2">mut </span>trimmed: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8] = seq.get(start - <span class="number">1</span>..end).unwrap_or(<span class="string">b&quot;&quot;</span>);
 
-    <span class="comment">// is this right? keeping CDS separate means we want to be in phase &amp; frame</span>
-    <span class="comment">// otherwise ignore this in spliced CDS</span>
+    <span class="comment">// is this right? keeping CDS separate means we want to be in phase &amp; frame
+    // otherwise ignore this in spliced CDS
 
-    <span class="kw">match</span> <span class="ident">spliced</span> {
-        <span class="bool-val">false</span> =&gt; {
-            <span class="kw">if</span> <span class="ident">frame</span> <span class="op">==</span> <span class="string">&quot;1&quot;</span> {
-                <span class="ident">trimmed</span> <span class="op">=</span> <span class="ident">trimmed</span>.<span class="ident">get</span>(<span class="number">1</span>..).<span class="ident">unwrap_or</span>(<span class="string">b&quot;&quot;</span>);
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">frame</span> <span class="op">==</span> <span class="string">&quot;2&quot;</span> {
-                <span class="ident">trimmed</span> <span class="op">=</span> <span class="ident">trimmed</span>.<span class="ident">get</span>(<span class="number">2</span>..).<span class="ident">unwrap_or</span>(<span class="string">b&quot;&quot;</span>);
-            } <span class="kw">else</span> {
-                <span class="ident">trimmed</span> <span class="op">=</span> <span class="ident">trimmed</span>;
+    </span><span class="kw">match </span>spliced {
+        <span class="bool-val">false </span>=&gt; {
+            <span class="kw">if </span>frame == <span class="string">&quot;1&quot; </span>{
+                trimmed = trimmed.get(<span class="number">1</span>..).unwrap_or(<span class="string">b&quot;&quot;</span>);
+            } <span class="kw">else if </span>frame == <span class="string">&quot;2&quot; </span>{
+                trimmed = trimmed.get(<span class="number">2</span>..).unwrap_or(<span class="string">b&quot;&quot;</span>);
+            } <span class="kw">else </span>{
+                trimmed = trimmed;
             }
 
-            <span class="kw">if</span> <span class="ident">trimmed</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">3</span> <span class="op">==</span> <span class="number">0</span> {
-                <span class="kw">return</span> <span class="ident">trimmed</span>;
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">trimmed</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">3</span> <span class="op">==</span> <span class="number">1</span> {
-                <span class="kw">return</span> <span class="ident">trimmed</span>.<span class="ident">get</span>(..<span class="ident">trimmed</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>).<span class="ident">unwrap_or</span>(<span class="string">b&quot;&quot;</span>);
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">trimmed</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">3</span> <span class="op">==</span> <span class="number">2</span> {
-                <span class="kw">return</span> <span class="ident">trimmed</span>.<span class="ident">get</span>(..<span class="ident">trimmed</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">2</span>).<span class="ident">unwrap_or</span>(<span class="string">b&quot;&quot;</span>);
-            } <span class="kw">else</span> {
-                <span class="kw">return</span> <span class="ident">trimmed</span>;
+            <span class="kw">if </span>trimmed.len() % <span class="number">3 </span>== <span class="number">0 </span>{
+                trimmed
+            } <span class="kw">else if </span>trimmed.len() % <span class="number">3 </span>== <span class="number">1 </span>{
+                <span class="kw">return </span>trimmed.get(..trimmed.len() - <span class="number">1</span>).unwrap_or(<span class="string">b&quot;&quot;</span>);
+            } <span class="kw">else if </span>trimmed.len() % <span class="number">3 </span>== <span class="number">2 </span>{
+                <span class="kw">return </span>trimmed.get(..trimmed.len() - <span class="number">2</span>).unwrap_or(<span class="string">b&quot;&quot;</span>);
+            } <span class="kw">else </span>{
+                <span class="kw">return </span>trimmed;
             }
         }
-        <span class="bool-val">true</span> =&gt; <span class="ident">trimmed</span>,
+        <span class="bool-val">true </span>=&gt; trimmed,
     }
 }
 
-<span class="doccomment">/// Reverse complement a string of DNA.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reverse_complement</span>(<span class="ident">dna</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">String</span> {
-    <span class="kw">let</span> <span class="ident">dna_chars</span> <span class="op">=</span> <span class="ident">dna</span>.<span class="ident">chars</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">revcomp</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+<span class="doccomment">/// Reverse complement a string of DNA.
+</span><span class="kw">pub fn </span>reverse_complement(dna: <span class="kw-2">&amp;</span>str) -&gt; String {
+    <span class="kw">let </span>dna_chars = dna.chars();
+    <span class="kw">let </span><span class="kw-2">mut </span>revcomp = Vec::new();
 
-    <span class="kw">for</span> <span class="ident">base</span> <span class="kw">in</span> <span class="ident">dna_chars</span> {
-        <span class="ident">revcomp</span>.<span class="ident">push</span>(<span class="ident">switch_base</span>(<span class="ident">base</span>))
+    <span class="kw">for </span>base <span class="kw">in </span>dna_chars {
+        revcomp.push(switch_base(base))
     }
-    <span class="ident">revcomp</span>.<span class="ident">as_mut_slice</span>().<span class="ident">reverse</span>();
-    <span class="ident">revcomp</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>()
+    revcomp.as_mut_slice().reverse();
+    revcomp.into_iter().collect()
 }
 
-<span class="doccomment">/// Switch bases to their complement.</span>
-<span class="kw">fn</span> <span class="ident">switch_base</span>(<span class="ident">c</span>: <span class="ident">char</span>) -&gt; <span class="ident">char</span> {
-    <span class="kw">match</span> <span class="ident">c</span> {
-        <span class="string">&#39;A&#39;</span> =&gt; <span class="string">&#39;T&#39;</span>,
-        <span class="string">&#39;a&#39;</span> =&gt; <span class="string">&#39;t&#39;</span>,
-        <span class="string">&#39;C&#39;</span> =&gt; <span class="string">&#39;G&#39;</span>,
-        <span class="string">&#39;c&#39;</span> =&gt; <span class="string">&#39;g&#39;</span>,
-        <span class="string">&#39;T&#39;</span> =&gt; <span class="string">&#39;A&#39;</span>,
-        <span class="string">&#39;t&#39;</span> =&gt; <span class="string">&#39;a&#39;</span>,
-        <span class="string">&#39;G&#39;</span> =&gt; <span class="string">&#39;C&#39;</span>,
-        <span class="string">&#39;g&#39;</span> =&gt; <span class="string">&#39;c&#39;</span>,
-        <span class="string">&#39;N&#39;</span> =&gt; <span class="string">&#39;N&#39;</span>,
-        <span class="string">&#39;n&#39;</span> =&gt; <span class="string">&#39;n&#39;</span>,
-        <span class="kw">_</span> =&gt; <span class="string">&#39;N&#39;</span>,
+<span class="doccomment">/// Switch bases to their complement.
+</span><span class="kw">fn </span>switch_base(c: char) -&gt; char {
+    <span class="kw">match </span>c {
+        <span class="string">&#39;A&#39; </span>=&gt; <span class="string">&#39;T&#39;</span>,
+        <span class="string">&#39;a&#39; </span>=&gt; <span class="string">&#39;t&#39;</span>,
+        <span class="string">&#39;C&#39; </span>=&gt; <span class="string">&#39;G&#39;</span>,
+        <span class="string">&#39;c&#39; </span>=&gt; <span class="string">&#39;g&#39;</span>,
+        <span class="string">&#39;T&#39; </span>=&gt; <span class="string">&#39;A&#39;</span>,
+        <span class="string">&#39;t&#39; </span>=&gt; <span class="string">&#39;a&#39;</span>,
+        <span class="string">&#39;G&#39; </span>=&gt; <span class="string">&#39;C&#39;</span>,
+        <span class="string">&#39;g&#39; </span>=&gt; <span class="string">&#39;c&#39;</span>,
+        <span class="string">&#39;N&#39; </span>=&gt; <span class="string">&#39;N&#39;</span>,
+        <span class="string">&#39;n&#39; </span>=&gt; <span class="string">&#39;n&#39;</span>,
+        <span class="kw">_ </span>=&gt; <span class="string">&#39;N&#39;</span>,
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="gff_stats" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="gff_stats" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

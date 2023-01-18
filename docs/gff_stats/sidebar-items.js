@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["seq","Sequence based manipulations on a GFF3/fasta combination."],["stat","Statistical manipulations on a GFF3/fasta combination."],["utils","Utility functions used in other modules."]]});
+window.SIDEBAR_ITEMS = {"mod":[["seq","Sequence based manipulations on a GFF3/fasta combination."],["stat","Statistical manipulations on a GFF3/fasta combination."],["utils","Utility functions used in other modules."]]};

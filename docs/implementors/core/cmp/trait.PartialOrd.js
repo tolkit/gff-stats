@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"gff_stats":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/cmp/trait.PartialOrd.html\" title=\"trait core::cmp::PartialOrd\">PartialOrd</a>&lt;<a class=\"enum\" href=\"gff_stats/utils/enum.Degeneracy.html\" title=\"enum gff_stats::utils::Degeneracy\">Degeneracy</a>&gt; for <a class=\"enum\" href=\"gff_stats/utils/enum.Degeneracy.html\" title=\"enum gff_stats::utils::Degeneracy\">Degeneracy</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

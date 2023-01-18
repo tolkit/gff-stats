@@ -1,101 +1,74 @@
 use anyhow::Result;
-use clap::{Arg, Command};
-use std::process;
+use clap::{arg, crate_version, value_parser, ArgMatches, Command};
+use std::path::PathBuf;
 
 use gff_stats::seq;
 use gff_stats::stat;
+use gff_stats::Degeneracy;
 
 fn main() -> Result<()> {
     // command line options
     let matches = Command::new("GFF(3) stats")
-        .version(clap::crate_version!())
-        .propagate_version(true)
+        .bin_name("gff-stats")
         .arg_required_else_help(true)
+        .version(crate_version!())
         .author("Max Brown <mb39@sanger.ac.uk>")
         .about("Extract GFF3 regions from a reference fasta and compute statistics on them.")
         .subcommand(
             Command::new("stat")
-            .about("Compute statistics on CDS regions")
-        .arg(
-            Arg::new("gff")
-            .short('g')
-            .long("gff")
-            .takes_value(true)
-            .required(true)
-            .help("The input gff file."),
+                .about("Compute statistics on CDS regions.")
+                .arg_required_else_help(true)
+                .arg(
+                    arg!(-g --gff <GFF> "The input GFF file")
+                        .required(true)
+                        .value_parser(value_parser!(PathBuf)),
+                )
+                .arg(arg!(-f --fasta <FASTA> "The reference fasta file")
+                    .required(true)
+                    .value_parser(value_parser!(PathBuf))
+                )
+                .arg(
+                    arg!(-d --degeneracy [DEGENERACY] "Calculate statistics on four-fold or six-fold (in addition to four-fold) degenerate codon sites.")
+                        .default_value("fourfold")
+                        .value_parser(value_parser!(Degeneracy)),
+                )
+                .arg(
+                    arg!(-s --spliced "Compute stats on spliced CDS sequences?")
+                        .action(clap::ArgAction::SetTrue)
+                )
+                .arg(
+                    arg!(-o --output [FILE])
+                        .default_value("gff-stat")
+                        .help("Output filename for the TSV (without extension)."),
+                ),
         )
-        .arg(
-            Arg::new("fasta")
-                .short('f')
-                .long("fasta")
-                .takes_value(true)
-                .required(true)
-                .help("The reference fasta file."),
+        .subcommand(
+            Command::new("seq")
+                .about("Extract CDS regions to fasta format. Printed to stdout.")
+                .arg(
+                    arg!(-g --gff <GFF> "The input GFF file")
+                        .required(true)
+                        .value_parser(value_parser!(PathBuf))
+                )
+                .arg(arg!(-f --fasta <FASTA> "The reference fasta file")
+                    .required(true)
+                    .value_parser(value_parser!(PathBuf))
+                )
+                .arg(
+                    arg!(-s --spliced "Compute stats on spliced CDS sequences?")
+                        .action(clap::ArgAction::SetTrue)
+                )
+                .arg(
+                    arg!(-p --protein "Save the extracted CDS fasta sequences as a translated protein?")
+                        .action(clap::ArgAction::SetTrue)
+                )
+                .arg(
+                    arg!(-o --output [FILE])
+                        .default_value("gff-stat")
+                        .help("Output filename for the fasta (without extension)."),
+                ),
         )
-        .arg(
-            Arg::new("degeneracy")
-                .short('d')
-                .long("degeneracy")
-                .required(false)
-                .default_value("fourfold")
-                .possible_values(&["fourfold", "sixfold"])
-                .help("Calculate statistics on four-fold or six-fold (in addition to four-fold) degenerate codon sites."),
-            )
-        .arg(
-            Arg::new("spliced")
-                .short('p')
-                .long("spliced")
-                .help("Compute stats on spliced CDS sequences?"),
-            )
-        .arg(
-            Arg::new("output")
-                .short('o')
-                .long("output")
-                .takes_value(true)
-                .default_value("gff-stat")
-                .help("Output filename for the TSV (without extension)."),
-            )
-        )
-        .subcommand(Command::new("seq")
-            .about("Extract CDS regions to fasta format. Printed to stdout.")
-            .arg(
-            Arg::new("gff")
-            .short('g')
-            .long("gff")
-            .takes_value(true)
-            .required(true)
-            .help("The input gff file."),
-        )
-        .arg(
-            Arg::new("fasta")
-                .short('f')
-                .long("fasta")
-                .takes_value(true)
-                .required(true)
-                .help("The reference fasta file."),
-        )
-        .arg(
-            Arg::new("spliced")
-                .short('s')
-                .long("spliced")
-                .help("Save the spliced extracted CDS fasta sequences?"),
-        )
-        .arg(
-            Arg::new("protein")
-                .short('p')
-                .long("protein")
-                .help("Save the extracted CDS fasta sequences as a translated protein?"),
-        )
-        .arg(
-            Arg::new("output")
-                .short('o')
-                .long("output")
-                .takes_value(true)
-                .default_value("gff-stat")
-                .help("Output filename for the fasta (without extension)."),
-        )
-    )
-    .get_matches();
+        .get_matches();
 
     let subcommand = matches.subcommand();
 
@@ -106,10 +79,7 @@ fn main() -> Result<()> {
         Some(("seq", matches)) => {
             seq::generate_seqs(matches)?;
         }
-        _ => {
-            eprintln!("Subcommand invalid, run with '--help' for subcommand options. Exiting.");
-            process::exit(1);
-        }
+        _ => unreachable!("Should never reach here."),
     }
 
     Ok(())

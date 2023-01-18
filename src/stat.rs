@@ -6,28 +6,30 @@ use rayon::prelude::*;
 use std::cmp::Reverse;
 use std::fs::{create_dir_all, File};
 use std::io::{BufWriter, LineWriter, Write};
+use std::path::PathBuf;
 use std::str;
 use std::sync::mpsc::channel;
 
 use crate::utils;
+use crate::Degeneracy;
 
 /// Wrapper function to calculate statistics on sequences from a
 /// GFF3 file.
 pub fn calculate_stats(matches: &clap::ArgMatches) -> Result<()> {
     // parse command line options
-    let input_gff = matches.value_of("gff").unwrap();
-    let input_fasta = matches.value_of("fasta").unwrap();
-    let degeneracy = matches.value_of_t("degeneracy").unwrap();
-    let spliced = matches.is_present("spliced");
-    let output = matches.value_of("output").unwrap();
+    let input_gff = matches.get_one::<PathBuf>("gff").unwrap();
+    let input_fasta = matches.get_one::<PathBuf>("fasta").unwrap();
+    let degeneracy = matches.get_one::<Degeneracy>("degeneracy").unwrap();
+    let spliced = matches.get_flag("spliced");
+    let output = matches.get_one::<String>("output").unwrap();
 
     // create directory for output
     if let Err(e) = create_dir_all("./gff-stats/") {
-        eprintln!("[-]\tCreate directory error: {}", e.to_string());
+        eprintln!("[-]\tCreate directory error: {}", e);
     }
 
     let file_name = format!("./gff-stats/{}_stats.tsv", output);
-    let stats = File::create(&file_name)?;
+    let stats = File::create(file_name)?;
     let stats = LineWriter::new(stats);
     let mut f = BufWriter::new(stats);
 
@@ -124,9 +126,9 @@ impl Writer {
 /// Note the order of output statistics is not repeatable, as they are
 /// processed in parallel.
 fn calculate_stats_unspliced<T: Write>(
-    input_gff: &str,
-    input_fasta: &str,
-    degeneracy: String,
+    input_gff: &PathBuf,
+    input_fasta: &PathBuf,
+    degeneracy: &Degeneracy,
     f: &mut BufWriter<LineWriter<T>>,
 ) -> Result<()> {
     let fasta_reader = fasta::Reader::from_file(input_fasta)?;
@@ -147,12 +149,11 @@ fn calculate_stats_unspliced<T: Write>(
             );
 
             // now iterate over the gff file, matching on chromosome/scaff/contig ID
-            let mut gff_reader =
-                gff::Reader::from_file(input_gff, gff::GffType::GFF3).expect("[-]\tPath invalid.");
+            let mut gff_reader = gff::Reader::from_file(input_gff.clone(), gff::GffType::GFF3)
+                .expect("[-]\tPath invalid.");
 
             for gff_record in gff_reader.records() {
-                let rec = gff_record
-                    .ok()
+                let rec = gff_record                    
                     .expect("[-]\tError during gff record parsing.");
 
                 if rec.seqname() != fasta_record.id() {
@@ -197,7 +198,7 @@ fn calculate_stats_unspliced<T: Write>(
                             );
                             let seq_stats = utils::whole_seq_stats(revcomp_slice_str);
                             let four_deg_codons =
-                                utils::gc_four_fold_deg_sites(revcomp_slice_str, &degeneracy);
+                                utils::gc_four_fold_deg_sites(revcomp_slice_str, degeneracy);
                             let gc_four = utils::four_fold_site_stats(four_deg_codons);
 
                             s.send(Output {
@@ -215,7 +216,7 @@ fn calculate_stats_unspliced<T: Write>(
                                 utils::gc_3(slice_str, Some(attr.get("ID").unwrap().clone()));
                             let seq_stats = utils::whole_seq_stats(slice_str);
                             let four_deg_codons =
-                                utils::gc_four_fold_deg_sites(slice_str, &degeneracy);
+                                utils::gc_four_fold_deg_sites(slice_str, degeneracy);
                             let gc_four = utils::four_fold_site_stats(four_deg_codons);
 
                             s.send(Output {
@@ -261,9 +262,9 @@ pub struct SplicedCDS {
 /// Note the order of output statistics is not repeatable, as they are
 /// processed in parallel.
 fn calculate_stats_spliced<T: Write>(
-    input_gff: &str,
-    input_fasta: &str,
-    degeneracy: String,
+    input_gff: &PathBuf,
+    input_fasta: &PathBuf,
+    degeneracy: &Degeneracy,
     f: &mut BufWriter<LineWriter<T>>,
 ) -> Result<()> {
     let fasta_reader = fasta::Reader::from_file(input_fasta)?;
@@ -284,10 +285,10 @@ fn calculate_stats_spliced<T: Write>(
             );
 
             // now iterate over the gff file, matching on chromosome/scaff/contig ID
-            let mut gff_reader_1 =
-                gff::Reader::from_file(input_gff, gff::GffType::GFF3).expect("[-]\tPath invalid.");
-            let mut gff_reader_2 =
-                gff::Reader::from_file(input_gff, gff::GffType::GFF3).expect("[-]\tPath invalid.");
+            let mut gff_reader_1 = gff::Reader::from_file(input_gff.clone(), gff::GffType::GFF3)
+                .expect("[-]\tPath invalid.");
+            let mut gff_reader_2 = gff::Reader::from_file(input_gff.clone(), gff::GffType::GFF3)
+                .expect("[-]\tPath invalid.");
 
             // we need to look ahead to the next iteration.
             // push
@@ -297,10 +298,8 @@ fn calculate_stats_spliced<T: Write>(
                 gff_reader_1.records().zip(gff_reader_2.records().skip(1))
             {
                 let rec_1 = gff_record_1
-                    .ok()
                     .expect("[-]\tError during gff record parsing.");
                 let rec_2 = gff_record_2
-                    .ok()
                     .expect("[-]\tError during gff record parsing.");
 
                 if rec_1.seqname() != fasta_record.id() {
@@ -385,7 +384,7 @@ fn calculate_stats_spliced<T: Write>(
                                     utils::gc_3(&res, Some(attr_1.get("ID").unwrap().clone()));
                                 let seq_stats = utils::whole_seq_stats(&res);
                                 let four_deg_codons =
-                                    utils::gc_four_fold_deg_sites(&res, &degeneracy);
+                                    utils::gc_four_fold_deg_sites(&res, degeneracy);
                                 let gc_four = utils::four_fold_site_stats(four_deg_codons);
 
                                 s.send(Output {
@@ -440,7 +439,7 @@ fn calculate_stats_spliced<T: Write>(
                                     utils::gc_3(&res, Some(attr_1.get("ID").unwrap().clone()));
                                 let seq_stats = utils::whole_seq_stats(&res);
                                 let four_deg_codons =
-                                    utils::gc_four_fold_deg_sites(&res, &degeneracy);
+                                    utils::gc_four_fold_deg_sites(&res, degeneracy);
                                 let gc_four = utils::four_fold_site_stats(four_deg_codons);
 
                                 s.send(Output {

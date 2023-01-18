@@ -1,5 +1,48 @@
+use clap::{ValueEnum, builder::PossibleValue};
 use std::collections::HashMap;
-use std::str;
+use std::str::{self, FromStr};
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Degeneracy {
+    Fourfold,
+    Sixfold,
+}
+
+// Can also be derived with feature flag `derive`
+impl ValueEnum for Degeneracy {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[Degeneracy::Fourfold, Degeneracy::Sixfold]
+    }
+
+    fn to_possible_value<'a>(&self) -> Option<PossibleValue> {
+        Some(match self {
+            Degeneracy::Fourfold => PossibleValue::new("fourfold").help("Run calculations on fourfold degenerate sites"),
+            Degeneracy::Sixfold => PossibleValue::new("sixfold").help("Run calculations on sizfold degenerate sites"),
+        })
+    }
+}
+
+impl std::fmt::Display for Degeneracy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.to_possible_value()
+            .expect("no values are skipped")
+            .get_name()
+            .fmt(f)
+    }
+}
+
+impl FromStr for Degeneracy {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        for variant in Self::value_variants() {
+            if variant.to_possible_value().unwrap().matches(s, false) {
+                return Ok(*variant);
+            }
+        }
+        Err(format!("invalid variant: {}", s))
+    }
+}
 
 /// Taken directly from `<https://github.com/dweb0/protein-translate/blob/master/src/lib.rs>`
 pub fn translate(seq: &[u8]) -> String {
@@ -167,13 +210,13 @@ pub fn four_fold_site_stats(codons: Vec<&[u8]>) -> FourFoldStats {
 }
 
 /// Take a trimmed sequence and return a vector of four/sixfold degenerate codons.
-pub fn gc_four_fold_deg_sites<'a>(dna: &'a str, degeneracy: &str) -> Vec<&'a [u8]> {
+pub fn gc_four_fold_deg_sites<'a>(dna: &'a str, degeneracy: &Degeneracy) -> Vec<&'a [u8]> {
     let bytes = dna.as_bytes();
     let codon_iterator = bytes.chunks(3);
     let mut collector = Vec::new();
 
     match degeneracy {
-        "fourfold" => {
+        Degeneracy::Fourfold => {
             for codon in codon_iterator {
                 let str_codon = str::from_utf8(codon).unwrap_or("");
                 if FOURFOLD_DEG.iter().any(|&i| i == str_codon.to_uppercase()) {
@@ -181,7 +224,7 @@ pub fn gc_four_fold_deg_sites<'a>(dna: &'a str, degeneracy: &str) -> Vec<&'a [u8
                 }
             }
         }
-        "sixfold" => {
+        Degeneracy::Sixfold => {
             for codon in codon_iterator {
                 let str_codon = str::from_utf8(codon).unwrap_or("");
                 if SIXFOLD_DEG.iter().any(|&i| i == str_codon.to_uppercase()) {
@@ -240,8 +283,7 @@ pub fn gc_3(dna: &str, id: Option<String>) -> GC3Stats {
             &[b'c'] => c_counts += 1,
             &[b'A'] => a_counts += 1,
             &[b'a'] => a_counts += 1,
-            &[b'T'] => t_counts += 1,
-            &[b't'] => t_counts += 1,
+            &[b'T'] | &[b't'] => t_counts += 1,
             _ => (),
         }
     }
@@ -280,7 +322,7 @@ pub fn trim_sequence<'a>(
             }
 
             if trimmed.len() % 3 == 0 {
-                return trimmed;
+                trimmed
             } else if trimmed.len() % 3 == 1 {
                 return trimmed.get(..trimmed.len() - 1).unwrap_or(b"");
             } else if trimmed.len() % 3 == 2 {

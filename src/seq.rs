@@ -4,6 +4,7 @@ use bio::io::gff;
 use bio_types::strand::Strand;
 use rayon::prelude::*;
 use std::cmp::Reverse;
+use std::path::PathBuf;
 use std::str;
 
 use crate::utils;
@@ -15,12 +16,16 @@ use crate::utils;
 /// from a fasta file and a GFF3 file.
 pub fn generate_seqs(matches: &clap::ArgMatches) -> Result<()> {
     // parse command line options
-    let input_gff = matches.value_of("gff").unwrap();
-    let input_fasta = matches.value_of("fasta").unwrap();
+    let input_gff = matches
+        .get_one::<PathBuf>("gff")
+        .expect("defaulted by clap");
+    let input_fasta = matches
+        .get_one::<PathBuf>("fasta")
+        .expect("defaulted by clap");
 
     // does the user want to print out spliced CDS?
-    let spliced = matches.is_present("spliced");
-    let protein = matches.is_present("protein");
+    let spliced = matches.get_flag("spliced");
+    let protein = matches.get_flag("protein");
 
     if spliced {
         run_spliced(input_gff, input_fasta, protein)?
@@ -36,7 +41,7 @@ pub fn generate_seqs(matches: &clap::ArgMatches) -> Result<()> {
 ///
 /// Note the order of output sequences is not repeatable, as they are
 /// processed in parallel.
-fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
+fn run_cds(input_gff: &PathBuf, input_fasta: &PathBuf, protein: bool) -> Result<()> {
     let fasta_reader = fasta::Reader::from_file(input_fasta)?;
 
     eprintln!("[+]\tProcessing the following fasta sequences in parallel:");
@@ -54,7 +59,6 @@ fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
 
         for gff_record in gff_reader.records() {
             let rec = gff_record
-                .ok()
                 .expect("[-]\tError during gff record parsing.");
 
             if rec.seqname() != fasta_record.id() {
@@ -106,27 +110,25 @@ fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
                                 revcomp_slice_str
                             )
                         }
+                    } else if protein {
+                        let prot = utils::translate(slice_str.as_bytes());
+                        println!(
+                            ">{}: {}(+): {}-{}\n{}",
+                            rec.seqname(),
+                            attr.get("ID").unwrap(),
+                            start,
+                            end,
+                            prot
+                        )
                     } else {
-                        if protein {
-                            let prot = utils::translate(slice_str.as_bytes());
-                            println!(
-                                ">{}: {}(+): {}-{}\n{}",
-                                rec.seqname(),
-                                attr.get("ID").unwrap(),
-                                start,
-                                end,
-                                prot
-                            )
-                        } else {
-                            println!(
-                                ">{}: {}(+): {}-{}\n{}",
-                                rec.seqname(),
-                                attr.get("ID").unwrap(),
-                                start,
-                                end,
-                                slice_str
-                            )
-                        }
+                        println!(
+                            ">{}: {}(+): {}-{}\n{}",
+                            rec.seqname(),
+                            attr.get("ID").unwrap(),
+                            start,
+                            end,
+                            slice_str
+                        )
                     }
                 }
             }
@@ -143,7 +145,7 @@ fn run_cds(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
 ///
 /// Note the order of output sequences is not repeatable, as they are
 /// processed in parallel.
-fn run_spliced(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> {
+fn run_spliced(input_gff: &PathBuf, input_fasta: &PathBuf, protein: bool) -> Result<()> {
     let fasta_reader = fasta::Reader::from_file(input_fasta)?;
     #[derive(Debug)]
     struct SplicedCDS {
@@ -175,10 +177,8 @@ fn run_spliced(input_gff: &str, input_fasta: &str, protein: bool) -> Result<()> 
             gff_reader_1.records().zip(gff_reader_2.records().skip(1))
         {
             let rec_1 = gff_record_1
-                .ok()
                 .expect("[-]\tError during gff record parsing.");
             let rec_2 = gff_record_2
-                .ok()
                 .expect("[-]\tError during gff record parsing.");
 
             if rec_1.seqname() != fasta_record.id() {

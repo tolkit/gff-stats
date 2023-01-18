@@ -4,3 +4,6 @@ pub mod seq;
 pub mod stat;
 /// Utility functions used in other modules.
 pub mod utils;
+
+/// For easier access to degeneracy enum
+pub use utils::Degeneracy;
