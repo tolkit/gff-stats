@@ -11,6 +11,7 @@ GC percent, GC skew, AT percent, and AC skew are calculated for each:
 
 gff-stats can also extract CDS/spliced CDS as a nucleotide or protein string to a fasta file (see below). Note this functionality is also provided by <a href="https://github.com/gpertea/gffread">gffread</a> (see below). `gffread` may be faster as it indexes the fasta for quick random access.
 
+Note: gff-stats requires the length of coding sequences of a given transcript to add up to a value divisible by three. In case any transcripts violate this assumption, they can be filtered out with the following script before running gff-stats: https://github.com/charlottewright/genomics_tools/blob/main/gff3_handling/filter_non_divisible_by_three_transcripts.py 
 ## Build
 
 Building <a href="https://www.rust-lang.org/tools/install">requires Rust</a>. 
